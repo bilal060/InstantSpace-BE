@@ -3,9 +3,17 @@ const validator = require('validator');
 const bcrypt = require('bcrypt')
 
 const userSchema = new mongoose.Schema({
-  name: {
+  fullName: {
     type: String,
-    required: [true, 'Please tell us your name!']
+  },
+  phoneNo: {
+    type: String,
+  },
+  dob: {
+    type: Date,
+  },
+  bio: {
+    type: String,
   },
   email: {
     type: String,
@@ -41,7 +49,7 @@ const userSchema = new mongoose.Schema({
     default:true,
     select:false,
       },
-      IsTrue:{
+      isTrue:{
         type:Boolean,
         default:false,
         select:false,
@@ -66,6 +74,14 @@ userSchema.methods.correctPassword = async function(
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
+
+userSchema.methods.correctotp = async function(
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
 
 userSchema.methods.createotp = async function() {
   const otp = `${Math.floor(1000 + Math.random() * 900)}`

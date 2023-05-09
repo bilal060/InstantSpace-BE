@@ -39,6 +39,41 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+exports.updateUserProfile = catchAsync(async (req, res, next) => {
+  try {
+    const { fullName, phoneNo, dob, bio } = req.body;
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      fullName,
+      phoneNo,
+      dob,
+      bio
+    });
+
+    if (!user) {
+      // Handle the case when the document is not found
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'Success',
+      message: 'User Profile Update',
+      data: {
+        user
+      }
+    });
+  } catch (error) {
+    // Log and handle any potential errors
+    console.error(error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error'
+    });
+  }
+});
+
 exports.deleteUser = factory.deleteOne(User)
 exports.updateUser = factory.updateOne(User)
 exports.createUser = factory.createOne(User)

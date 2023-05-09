@@ -17,7 +17,7 @@ const signToken = id =>{
     )
 }
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, res,message) => {
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
@@ -33,13 +33,12 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({
     status: 'success',
     token,
+    message:message,
     data: {
       user
     }
   });
 };
-
-
 exports.signup =catchAsync( async (req,res)=>{
         const user =await User.create({
           name:req.body.name,
@@ -49,7 +48,6 @@ exports.signup =catchAsync( async (req,res)=>{
           passwordConfirm:req.body.passwordConfirm,
         })
 const ResetOtp = await  user.createotp()
-
 await user.save({validateBeforeSave:false});
 const message = `Please Vierify your Account with This OTP ${ResetOtp}.`
 try{
@@ -69,19 +67,22 @@ try{
 }
  }
 )
-exports.verifyOTP = catchAsync(async (req,res)=>{
-  const { otp } = req.body;
-    const user = await User.findOne({ 
-      passwordResetotp: otp , 
-      passwordResetExpires:{$gt:Date.now()}
-    });
-    if(!user){
-      return next(new AppError('OTP is invalid and expire', 400 )) 
-    }
+exports.verifyOTP = catchAsync(async (req,res,next)=>{
+  const {email,otp} = req.body
+  if(!(email,otp)){
+   return next(new AppError('please provide email and otp !', 400 ))
+  }
+  const user = await User.findOne({email}).select('+password')
+  if(!user || !await user.correctotp(otp,user.otp)){
+    return next(new AppError('otp and email are incorrect!', 401))
+  }
+  if(user.otpExpireTime<Date.now()){
+    return next(new AppError('OTP is invalid and expire', 400 )) 
+  }
     user.isTrue = true;
     user.otp = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
+    user.otpExpireTime = undefined;
+    await user.save({validateBeforeSave:false});
    const  message ='succssfully verify';
     createSendToken(user,200,res,message)
 })
