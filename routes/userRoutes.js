@@ -5,10 +5,10 @@ const authController = require('./../controllers/authController');
 const router = express.Router();
 router.post('/signup',authController.signup)
 router.post('/verifyotp',authController.verifyOTP)
-router.post('/UpdateUserProfile/:id',authController.protect,authController.restrictTo('Customer'),userController.updateUserProfile)
+router.patch('/UpdateUserProfile',authController.protect,userController.updateUserProfile)
 router.post('/login',authController.login)
 router.post('/forgotpassword',authController.forgotpassword)
-router.patch('/resetPassword/:otp',authController.resetPassword)
+router.patch('/resetPassword',authController.resetPassword)
 router.patch('/updatePassword',authController.protect,authController.updatePassword)
 router.patch('/updateMe',authController.protect,userController.updateMe)
 router.delete('/deleteMe',authController.protect,userController.deleteMe)

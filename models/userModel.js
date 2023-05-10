@@ -15,6 +15,18 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
+  cType: {
+    type: String,
+  },
+  cPhone: {
+    type: String,
+  },
+  cLicenseNo: {
+    type: String,
+  },
+  cDoc: {
+    type: String,
+  },
   email: {
     type: String,
     required: [true, 'Please provide your email'],
@@ -82,7 +94,6 @@ userSchema.methods.correctotp = async function(
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-
 userSchema.methods.createotp = async function() {
   const otp = `${Math.floor(1000 + Math.random() * 900)}`
   const hashotp = await bcrypt.hash(otp, 12);
@@ -98,7 +109,6 @@ userSchema.pre('save', function(next) {
 });
 
 userSchema.pre(/^find/, function(next) {
-  // this points to the current query
   this.find({ active: { $ne: false } });
   next();
 });

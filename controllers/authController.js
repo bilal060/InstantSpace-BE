@@ -17,6 +17,17 @@ const signToken = id =>{
     )
 }
 
+/**
+ * The function creates and sends a JWT token to the client along with user data and a success message.
+ * @param user - The user object that contains the user's information, including their ID and password.
+ * @param statusCode - The HTTP status code to be sent in the response. It can be any valid HTTP status
+ * code such as 200, 201, 400, 401, 404, 500, etc.
+ * @param res - `res` is the response object that is used to send the HTTP response back to the client.
+ * It is typically passed as a parameter to an Express route handler function.
+ * @param message - The message parameter is a custom message that can be passed to the function to be
+ * included in the response JSON object. It can be used to provide additional information or context
+ * about the response.
+ */
 const createSendToken = (user, statusCode, res,message) => {
   const token = signToken(user._id);
   const cookieOptions = {
@@ -86,9 +97,6 @@ exports.verifyOTP = catchAsync(async (req,res,next)=>{
    const  message ='succssfully verify';
     createSendToken(user,200,res,message)
 })
-
-
-
 exports.login = catchAsync(async (req,res,next)=>{
     const {email,password} = req.body
     if(!(email,password)){
@@ -120,18 +128,14 @@ if(currentUser.changedPasswordAfter(decode.iat)){
 req.user = currentUser;
 next()
 })
-
-
-
 exports.forgotpassword = catchAsync(async (req,res,next)=>{
 const user = await User.findOne({email:req.body.email})
 if(!user){
   return next(new AppError('No user have with this email', 404 )) 
 }
-const ResetOtp = await  user.createPasswordResetOtp()
+const ResetOtp = await  user.createotp()
 await user.save({validateBeforeSave:false});
-const message = `forgot your password submit a PATCH request with your Password and confirmPassword
-to ${ResetOtp}.\n If you did't forget your password , Please ignore this email`
+const message = `Your Reset Password OTP is ${ResetOtp}`
 try{
   await sendEmail({
     email:user.email,
@@ -143,26 +147,21 @@ try{
     message:'ResetPassword OTP send into email'
   });
 }catch(err){
-  user.createPasswordResetOtp = undefined;
-  user.passwordResetExpires - undefined;
+  user.otp = undefined;
+  user.otpExpireTime = undefined;
   await user.save({validateBeforeSave:false});
   return(new AppError('somting wrong to send email ',500))
 }
-
-
-
 })
+
 exports.resetPassword =catchAsync( async (req,res,next)=>{
-   const { otp } = req.params;
-    const user = await User.findOne({ 
-      passwordResetotp: otp , 
-      passwordResetExpires:{$gt:Date.now()}
-    });
+   const { email, password  , passwordConfirm} = req.body;
+    const user = await User.findOne({email});
     if(!user){
       return next(new AppError('OTP is invalid and expire', 400 )) 
     }
-    user.password = req.body.password;
-    user.passwordConfirm = req.body.passwordConfirm;
+    user.password = password
+    user.passwordConfirm =passwordConfirm
     user.passwordResetotp = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
@@ -170,6 +169,9 @@ exports.resetPassword =catchAsync( async (req,res,next)=>{
     createSendToken(user,200,res,message)
 
   });
+
+
+
 exports.updatePassword = catchAsync( async (req,res,next)=>{
     const user = await User.findById(req.user.id).select('+password');
     if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {

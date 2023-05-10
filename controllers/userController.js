@@ -33,30 +33,29 @@ const filterObj = (obj, ...allowedFields) => {
 });
 exports.deleteMe = catchAsync(async (req, res, next) => {
  await User.findByIdAndUpdate(req.user.id,{active:false})
-
   res.status(200).json({
     status: 'success',
     data: null,
   });
 });
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
-  try {
-    const { fullName, phoneNo, dob, bio } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, {
-      fullName,
-      phoneNo,
-      dob,
-      bio
-    });
+
+    const { fullName, phoneNo, dob, bio, cType, cPhone, cLicenseNo, cDoc } = req.body;
+    const { role } = req.user;
+    const options = { validateBeforeSave: false };
+    let updatedFields = {};
+    if (role === 'Customer') {
+      updatedFields = { fullName, phoneNo, dob, bio };
+    } else if (role === 'Business Owner') {
+      updatedFields = {  cType, cPhone, cLicenseNo, cDoc };
+    } else {
+      return next(new AppError('Invalid user role', 400));
+    }
+    const user = await User.findByIdAndUpdate(req.user.id, updatedFields, { new: true }).setOptions(options);;
 
     if (!user) {
-      // Handle the case when the document is not found
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
+      return next(new AppError("No User Find Please Double Check What's the Issue", 400));
     }
-
     res.status(200).json({
       status: 'Success',
       message: 'User Profile Update',
@@ -64,15 +63,8 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
         user
       }
     });
-  } catch (error) {
-    // Log and handle any potential errors
-    console.error(error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Internal server error'
-    });
-  }
 });
+
 
 exports.deleteUser = factory.deleteOne(User)
 exports.updateUser = factory.updateOne(User)
