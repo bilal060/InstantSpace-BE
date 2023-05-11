@@ -42,6 +42,61 @@ const addNewSpace = async (req, res, next) => {
     res.status(201).json({ message: 'Space added successfully' });
 };
 
+
+
+const updateSpace = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new AppError('Invalid data received', 422));
+    }
+
+    const spaceId = req.params.spaceId;
+    const { body, files } = req;
+
+    let updatedSpace;
+    try {
+        updatedSpace = await Space.findById(spaceId);
+    } catch (error) {
+        console.log(error);
+        return next(new AppError("Error retrieving space", 500));
+    }
+
+    if (!updatedSpace) {
+        return next(new AppError("Space not found", 404));
+    }
+
+    // Update space properties
+    updatedSpace.category = body.category;
+    updatedSpace.area = body.area;
+    updatedSpace.contact = body.contact;
+    updatedSpace.security = body.security;
+    updatedSpace.cameras = body.cameras;
+    updatedSpace.capacity = body.capacity;
+    updatedSpace.fuel = body.fuel;
+    updatedSpace.rate_hour = body.rate_hour;
+    updatedSpace.rate_day = body.rate_day;
+    updatedSpace.rate_week = body.rate_week;
+    updatedSpace.rate_month = body.rate_month;
+    updatedSpace.location = body.location;
+    updatedSpace.description = body.description;
+
+    if (files && files.length > 0) {
+        const imagesPath = files.map(img => img.path);
+        updatedSpace.images = imagesPath;
+    }
+
+    try {
+        await updatedSpace.save();
+    } catch (error) {
+        console.log(error);
+        return next(new AppError("Error updating space", 500));
+    }
+
+    res.status(200).json({ message: 'Space updated successfully' });
+};
+
+
+
 /**
  * This function retrieves all spaces from a database and sends them as a JSON response.
  * @param req - req stands for request and it is an object that contains information about the HTTP
@@ -209,4 +264,5 @@ exports.getAllSpaces = getAllSpaces;
 exports.getSingleSpace = getSingleSpace;
 exports.getUserSpaces = getUserSpaces;
 exports.addReview = addReview;
+exports.updateSpace = updateSpace;
 
