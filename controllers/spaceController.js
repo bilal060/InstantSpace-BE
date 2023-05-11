@@ -142,8 +142,71 @@ const getUserSpaces = async (req, res, next) => {
     res.json({ spaces: allSpaces });
 };
 
+/**
+ * This function adds a review to a space and returns a success message.
+ * @param req - req stands for request and it is an object that contains information about the HTTP
+ * request that was made, such as the request headers, request parameters, request body, etc.
+ * @param res - `res` is the response object that is used to send a response back to the client making
+ * the request. It contains methods like `json()` to send a JSON response, `send()` to send a plain
+ * text response, and `status()` to set the HTTP status code of the response.
+ * @param next - `next` is a function that is called to pass control to the next middleware function in
+ * the stack. It is typically used to handle errors or to move on to the next function in the chain of
+ * middleware functions.
+ * @returns a JSON response with a message "Review added successfully" if the review is added
+ * successfully to the space details. If there are any errors during the process, it will call the next
+ * middleware function with an error message.
+ */
+const addReview = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new AppError('Invalid data received', 422));
+    }
+
+    const { userId, spaceId, review, rating } = req.body;
+
+    let userDetails;
+    try {
+        userDetails = await User.findById(userId);
+    } catch (error) {
+        console.log({ error });
+        return next(new AppError('Error finding user', 500));
+    };
+
+    if (!userDetails) {
+        return next(new AppError('No user found against id', 404));
+    }
+
+    let spaceDetails;
+    try {
+        spaceDetails = await Space.findById(spaceId);
+    } catch (error) {
+        console.log({ error });
+        return next(new AppError('Error finding space', 500));
+    }
+
+    if (!spaceDetails) {
+        return next(new AppError('No space found against id', 404));
+    }
+
+    spaceDetails.reviews.push({
+        userId,
+        review,
+        rating
+    });
+
+    try {
+        await spaceDetails.save();
+    } catch (error) {
+        console.log({ error });
+        return next(new AppError('Error adding review', 500));
+    }
+
+    res.json({ message: 'Review added successfully' });
+};
+
 exports.addNewSpace = addNewSpace;
 exports.getAllSpaces = getAllSpaces;
 exports.getSingleSpace = getSingleSpace;
 exports.getUserSpaces = getUserSpaces;
+exports.addReview = addReview;
 

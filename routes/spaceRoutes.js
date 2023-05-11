@@ -23,11 +23,18 @@ router.post('/add_space', authController.protect, spaceUpload.any('space_imgs'),
     check('capacity').isString().not().isEmpty(),
     check('fuel').optional({ checkFalsy: true }).isString().not().isEmpty(),
     check('rate_hour').isInt().not().isEmpty(),
-    check('rate_day').isNumeric().not().isEmpty(),
-    check('rate_week').isNumeric().not().isEmpty(),
-    check('rate_month').isNumeric().not().isEmpty(),
+    check('rate_day').isInt().not().isEmpty(),
+    check('rate_week').isInt().not().isEmpty(),
+    check('rate_month').isInt().not().isEmpty(),
     check('location').isString().not().isEmpty(),
     check('description').isString().not().isEmpty(),
 ], spaceController.addNewSpace);
+
+router.post('/add_review', authController.protect, spaceUpload.any('space_imgs'), [
+    check('userId').not().isEmpty(),
+    check('spaceId').not().isEmpty(),
+    check('review').isString().not().isEmpty(),
+    check('rating').isDecimal().not().isEmpty(),
+], spaceController.addReview);
 
 module.exports = router;
