@@ -22,6 +22,7 @@ const spaceSchema = new Schema({
     location: { type: String },
     description: { type: String },
     images: [{ type: String }],
+    available: { type: Boolean, default: true },
     reviews: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         review: { type: String },

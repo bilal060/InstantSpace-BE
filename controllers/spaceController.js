@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 const AppError = require('../utils/appError');
 const Space = require('../models/spaceModel');
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
 
 /**
  * This function adds a new space to a database with images and returns a success message or an error
@@ -42,8 +43,19 @@ const addNewSpace = async (req, res, next) => {
     res.status(201).json({ message: 'Space added successfully' });
 };
 
-
-
+/**
+ * This function updates a space's properties and images in a database.
+ * @param req - req stands for request and it is an object that contains information about the HTTP
+ * request that was made, such as the request headers, request parameters, request body, etc.
+ * @param res - `res` is the response object that is used to send the response back to the client. It
+ * contains methods like `status`, `json`, `send`, etc. that are used to set the response status code,
+ * headers, and body. In this code snippet, `res` is used to
+ * @param next - `next` is a function that is called to pass control to the next middleware function in
+ * the stack. It is typically used to handle errors or to move on to the next function in the chain of
+ * middleware functions.
+ * @returns a JSON response with a message indicating that the space was updated successfully, with a
+ * status code of 200.
+ */
 const updateSpace = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -230,6 +242,14 @@ const addReview = async (req, res, next) => {
     if (!userDetails) {
         return next(new AppError('No user found against id', 404));
     }
+
+    let userBookingDetails;
+    try {
+        userBookingDetails = await Booking.findOne({ userId, spaceId });
+    } catch (error) {
+        console.log({ error });
+        return next(new AppError('User cannot post a review on this space', 401));
+    };
 
     let spaceDetails;
     try {
