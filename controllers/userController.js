@@ -40,15 +40,16 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
 
-    const { fullName, phoneNo, dob, bio, cType, cPhone, cLicenseNo, cDoc } = req.body;
+    const { fullName, phoneNo, dob, bio, cType, cPhone, cLicenseNo,cAddress} = req.body;
     const { role } = req.user;
     const options = { validateBeforeSave: false };
     let updatedFields = {};
     if (role === 'Customer') {
-      updatedFields = { fullName, phoneNo, dob, bio };
+      const profilePath = req.file?.path
+      updatedFields = { fullName, phoneNo, dob, bio,photo:profilePath };
     } else if (role === 'Business Owner') {
       const cDocPath = req.file?.path
-      updatedFields = {  cType, cPhone, cLicenseNo, cDoc :cDocPath};
+      updatedFields = {  cType, cPhone, cLicenseNo,cAddress, cDoc :cDocPath};
     } else {
       return next(new AppError('Invalid user role', 400));
     }

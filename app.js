@@ -53,6 +53,7 @@ const limiter = rateLimit({
 app.use('/uploads/chat', express.static(path.join('uploads', 'chat')));
 app.use('/uploads/space', express.static(path.join('uploads', 'space')));
 app.use('/uploads/docs', express.static(path.join('uploads', 'docs')));
+app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

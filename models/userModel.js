@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
   cDoc: {
     type: String,
   },
+  cAddress: {
+    type: String,
+  },
   email: {
     type: String,
     required: [true, 'Please provide your email'],
