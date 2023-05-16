@@ -168,6 +168,23 @@ const getSingleSpace = async (req, res, next) => {
     res.json({ space: singleSpace });
 };
 
+const deleteSpace = async (req, res, next) => {
+    const sid = req.params.sid;
+
+    let singleSpace;
+    try {
+        singleSpace = await Space.findByIdAndDelete(sid);
+    } catch (error) {
+        console.log({ error });
+        return next(new AppError('Error finding space', 500));
+    };
+
+    if (!singleSpace) {
+        return next(new AppError('No space found against id', 404));
+    }
+
+    res.json({ space: singleSpace });
+};
 /**
  * This function retrieves all spaces associated with a user ID and returns them as a JSON object.
  * @param req - req stands for request and it is an object that contains information about the HTTP
@@ -285,4 +302,5 @@ exports.getSingleSpace = getSingleSpace;
 exports.getUserSpaces = getUserSpaces;
 exports.addReview = addReview;
 exports.updateSpace = updateSpace;
+exports.deleteSpace = deleteSpace;
 

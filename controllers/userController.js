@@ -47,7 +47,8 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
     if (role === 'Customer') {
       updatedFields = { fullName, phoneNo, dob, bio };
     } else if (role === 'Business Owner') {
-      updatedFields = {  cType, cPhone, cLicenseNo, cDoc };
+      const cDocPath = req.file?.path
+      updatedFields = {  cType, cPhone, cLicenseNo, cDoc :cDocPath};
     } else {
       return next(new AppError('Invalid user role', 400));
     }
