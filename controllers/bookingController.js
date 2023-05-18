@@ -81,9 +81,13 @@ const createBooking = async (req, res, next) => {
  * The JSON object has a key "bookings" which holds an array of all the bookings.
  */
 const getAllBookings = async (req, res, next) => {
+    const options = {
+        page: parseInt('1', 10),
+        limit: parseInt('2', 10)
+    };
     let allBookings;
     try {
-        allBookings = await Booking.find({});
+        allBookings = await Booking.paginate({}, options);
     } catch (error) {
         console.log({ error });
         return next(new AppError("Error fetching bookings", 500));
@@ -119,6 +123,7 @@ const userBookings = async (req, res, next) => {
 
     res.json({ userBookings });
 };
+
 
 /**
  * This function fetches booking details by ID and returns them as a JSON response.
