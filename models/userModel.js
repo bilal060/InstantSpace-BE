@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   cType: {
     type: String,
+    default: ''
   },
   cPhone: {
     type: String,
