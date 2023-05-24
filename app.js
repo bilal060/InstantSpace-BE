@@ -6,6 +6,7 @@ const conversationRouter = require('./routes/conversationRoutes');
 const messageRouter = require('./routes/messageRoutes');
 const spaceRouter = require('./routes/spaceRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const mongoSanitize = require('express-mongo-sanitize')
@@ -70,6 +71,7 @@ app.use('/api/v1/conversations', conversationRouter);
 app.use('/api/v1/messages', messageRouter);
 app.use('/api/v1/spaces', spaceRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/api/v1/category', categoryRouter);
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
 })
