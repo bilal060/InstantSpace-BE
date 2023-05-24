@@ -27,7 +27,6 @@ const Updatecategory = catchAsync(async (req, res, next) => {
 const getAllcategory = factory.getAll(Category)
 const deletecategory = factory.deleteOne(Category)
 const getcategory = factory.getOne(Category)
-// const getAllcategory = factory.getAll(Category)
 
 const usercategory = async (req, res, next) => {
     const uid = req.params.uid;
@@ -124,3 +123,4 @@ exports.Updatecategory = Updatecategory;
 exports.addSubcategory = addSubcategory;
 exports.updateSubcategory = updateSubcategory;
 exports.deleteSubcategory = deleteSubcategory;
+
