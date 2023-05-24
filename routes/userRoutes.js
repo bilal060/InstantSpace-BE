@@ -5,6 +5,7 @@ const userController = require('./../controllers/userController');
 const authController = require('./../controllers/authController');
 const fileUpload = require('../middlewares/docs-upload');
 const profileUpload = require('../middlewares/profile-upload');
+const passport = require('../utils/passport');
 const router = express.Router();
 router.post('/signup', authController.signup)
 router.post('/verifyotp', authController.verifyOTP);
@@ -33,6 +34,8 @@ router.patch('/UpdateUserProfile', authController.protect, (req, res, next) => {
   }
 }, userController.updateUserProfile);
 
+router.get('/signup/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/signup/google/callback', passport.authenticate('google'), userController.signupWithGoogle);
 router.post('/login', authController.login)
 router.post('/forgotpassword', authController.forgotpassword)
 router.patch('/resetPassword', authController.resetPassword)

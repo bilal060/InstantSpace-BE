@@ -13,6 +13,8 @@ const hpp = require('hpp')
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 const app = express();
+const session = require('express-session');
+const passport = require('passport');
 const bodyParser = require('body-parser');
 const sanitizeHtml = require('sanitize-html');
 app.use(express.json({ limit: '10kb' }));
@@ -30,6 +32,15 @@ function checkForHTMLTags(req, res, next) {
   }
   next();
 }
+app.use(
+  session({
+    secret: 'YOUR_SESSION_SECRET',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(checkForHTMLTags);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

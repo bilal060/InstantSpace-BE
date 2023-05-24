@@ -67,7 +67,15 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.signupWithGoogle =catchAsync(async (req, res,next) => {
+  const user = new User({
+      name: req.user.displayName,
+      email: req.user.emails[0].value,
 
+    });
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({ user: user});
+});
 exports.deleteUser = factory.deleteOne(User)
 exports.updateUser = factory.updateOne(User)
 exports.createUser = factory.createOne(User)
