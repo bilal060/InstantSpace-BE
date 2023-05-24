@@ -21,4 +21,15 @@ router
   ],categoryController.Updatecategory)
   .delete(categoryController.deletecategory);
 
+  // sub category
+  router
+  .route('/subcategory/addSubcategory')
+  .put(categoryController.addSubcategory);
+  router
+  .route('/subcategory/update')
+  .put(categoryController.updateSubcategory);
+  router
+  .route('/subcategory/:cat_id/:sub_cat_id')
+  .delete(categoryController.deleteSubcategory);
+
 module.exports = router;
