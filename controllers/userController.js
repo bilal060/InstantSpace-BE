@@ -10,7 +10,7 @@ const filterObj = (obj, ...allowedFields) => {
   });
   return newObj;
 };
-  exports.updateMe = catchAsync(async (req, res, next) => {
+exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
     return next(
       new AppError(
@@ -23,7 +23,7 @@ const filterObj = (obj, ...allowedFields) => {
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true
-  }); 
+  });
   res.status(200).json({
     status: 'success',
     data: {
@@ -32,7 +32,7 @@ const filterObj = (obj, ...allowedFields) => {
   });
 });
 exports.deleteMe = catchAsync(async (req, res, next) => {
- await User.findByIdAndUpdate(req.user.id,{active:false})
+  await User.findByIdAndUpdate(req.user.id, { active: false })
   res.status(200).json({
     status: 'success',
     data: null,
@@ -40,31 +40,31 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
 
-    const { fullName, phoneNo, dob, bio, cType, cPhone, cLicenseNo,cAddress} = req.body;
-    const { role } = req.user;
-    const options = { validateBeforeSave: false };
-    let updatedFields = {};
-    if (role === 'Customer') {
-      const profilePath = req.file?.path
-      updatedFields = { fullName, phoneNo, dob, bio,photo:profilePath };
-    } else if (role === 'Business Owner') {
-      const cDocPath = req.file?.path
-      updatedFields = {  cType, cPhone, cLicenseNo,cAddress, cDoc :cDocPath};
-    } else {
-      return next(new AppError('Invalid user role', 400));
-    }
-    const user = await User.findByIdAndUpdate(req.user.id, updatedFields, { new: true }).setOptions(options);;
+  const { fullName, phoneNo, dob, bio, cType, cPhone, cLicenseNo, cAddress } = req.body;
+  const { role } = req.user;
+  const options = { validateBeforeSave: false };
+  let updatedFields = {};
+  if (role === 'Customer') {
+    const profilePath = req.file?.path
+    updatedFields = { fullName, phoneNo, dob, bio, photo: profilePath };
+  } else if (role === 'Business Owner') {
+    const cDocPath = req.file?.path
+    updatedFields = { cPhone, cLicenseNo, cAddress, cDoc: cDocPath };
+  } else {
+    return next(new AppError('Invalid user role', 400));
+  }
+  const user = await User.findByIdAndUpdate(req.user.id, updatedFields, { new: true }).setOptions(options);;
 
-    if (!user) {
-      return next(new AppError("No User Find Please Double Check What's the Issue", 400));
+  if (!user) {
+    return next(new AppError("No User Find Please Double Check What's the Issue", 400));
+  }
+  res.status(200).json({
+    status: 'Success',
+    message: 'User Profile Update',
+    data: {
+      user
     }
-    res.status(200).json({
-      status: 'Success',
-      message: 'User Profile Update',
-      data: {
-        user
-      }
-    });
+  });
 });
 
 
