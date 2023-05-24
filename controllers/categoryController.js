@@ -77,8 +77,50 @@ const categoryDetails = async (req, res, next) => {
     res.json({ categoryDetails });
 };
 
+const addSubcategory = catchAsync(async (req, res, next) => {
+    const {cat_id ,name} = req.body;
+   const updateSubcategory =  await  Category.updateOne(
+        { _id:  cat_id},   
+        { $push: {
+            subcategories:{
+                $each:[{name:name}]
+            }
+        }},
+        { new: true }
+        )
+    res.status(200).json({ 
+        message: ' Added subcategory successfully',
+    });
+});
+const updateSubcategory = catchAsync(async (req, res, next) => {
+    const {cat_id , sub_cat_id ,name} = req.body;
+   const updateSubcategory =  await  Category.updateOne(
+        { _id:  cat_id ,'subcategories._id': sub_cat_id},   
+        { $set: {"subcategories.$.name": name }},
+        { new: true }
+        )
+    res.status(201).json({ 
+        message: ' updated subcategory successfully',
+    });
+});
+
+const deleteSubcategory = catchAsync(async (req, res, next) => {
+    const cat_id = req.params.cat_id;
+    const sub_cat_id = req.params.sub_cat_id;
+   const deleteCategory =  await  Category.update(
+        { _id:  cat_id },
+        { $pull: { subcategories: { _id: sub_cat_id} } },
+        {multi:true}
+        )
+    res.status(200).json({ 
+        message: 'Delete subcategory successfully'
+    });
+});
 exports.createcategory = createcategory;
 exports.getAllcategory = getAllcategory;
 exports.deletecategory = deletecategory;
 exports.getcategory = getcategory;
 exports.Updatecategory = Updatecategory;
+exports.addSubcategory = addSubcategory;
+exports.updateSubcategory = updateSubcategory;
+exports.deleteSubcategory = deleteSubcategory;
