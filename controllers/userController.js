@@ -39,18 +39,20 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
-
-  const { fullName, phoneNo, dob, bio, cType, cPhone, cLicenseNo, cAddress } = req.body;
   const { role } = req.user;
   const options = { validateBeforeSave: false };
   let updatedFields = {};
   if (role === 'Customer') {
     const profilePath = req.file?.path
-    updatedFields = { fullName, phoneNo, dob, bio, photo: profilePath };
+    updatedFields = { fullName, phoneNo, dob, bio, photo: profilePath,Categories,subCategories} = req.body;
   } else if (role === 'Business Owner') {
     const cDocPath = req.file?.path
-    updatedFields = { cPhone, cLicenseNo, cAddress, cDoc: cDocPath };
-  } else {
+    updatedFields = { cPhone, cLicenseNo, cAddress, cDoc: cDocPath,Categories,subCategories} = req.body;
+  } 
+  else if (role === 'Truck Driver') {
+    const profilePath = req.file?.path
+    updatedFields = { fullName, phoneNo,dob,bio,gender,profilePath,Categories,subCategories} = req.body;
+  }else {
     return next(new AppError('Invalid user role', 400));
   }
   const user = await User.findByIdAndUpdate(req.user.id, updatedFields, { new: true }).setOptions(options);;

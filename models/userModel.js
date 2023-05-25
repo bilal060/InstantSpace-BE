@@ -15,19 +15,23 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
-  cType: {
+  companyType: {
+    type: String,
+    enum: ['Individual', 'Company'],
+  },
+  companyPhone: {
     type: String,
   },
-  cPhone: {
+  companyLicenseNo: {
     type: String,
   },
-  cLicenseNo: {
+  gender: {
     type: String,
   },
-  cDoc: {
+  companyDoc: {
     type: String,
   },
-  cAddress: {
+  companyAddress: {
     type: String,
   },
   email: {
@@ -40,7 +44,7 @@ const userSchema = new mongoose.Schema({
   photo: String,
   role: {
     type: String,
-    enum: ['Customer', 'Business Owner', 'Manager', 'Admin'],
+    enum: ['Customer', 'Business Owner', 'Manager', 'Admin','Truck Driver'],
     default: 'Customer'
   },
   password: {
@@ -69,6 +73,8 @@ const userSchema = new mongoose.Schema({
     default: false,
     select: false,
   },
+  Categories:    [{type: mongoose.Schema.ObjectId,ref: 'Category'}],
+  subCategories: [{type: mongoose.Schema.ObjectId,ref: 'Category'}],
   cards: [{ type: String }],
   passwordChangedAt: Date,
   otp: String,
