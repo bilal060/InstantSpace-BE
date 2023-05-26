@@ -25,6 +25,9 @@ const userSchema = new mongoose.Schema({
   companyLicenseNo: {
     type: String,
   },
+  companyName: {
+    type: String,
+  },
   gender: {
     type: String,
   },
