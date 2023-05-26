@@ -9,6 +9,9 @@ const categorySchema = new mongoose.Schema({
   subcategories: [{
     name:{type:String}
   }],
+  role:{
+    type:String
+  }
 });
 const category = mongoose.model('categories', categorySchema);
 

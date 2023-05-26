@@ -38,6 +38,11 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     data: null
   });
 });
+/* This code exports a function called `updateUserProfile` that updates the user profile based on the
+user's role. It first extracts the necessary fields from the request body and the user object. Then,
+it checks the user's role and updates the user's profile accordingly. If the user's role is not
+recognized, it returns an error. Finally, it updates the user's profile in the database and returns
+a success message with the updated user object. */
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
   const {
     fullName,
@@ -48,7 +53,9 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
     companyPhone,
     companyLicenseNo,
     companyAddress,
-    gender
+    gender,
+    Categories,
+    companyType
   } = req.body;
   const { role } = req.user;
   const options = { validateBeforeSave: false };
@@ -61,7 +68,7 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
       dob,
       bio,
       photo: CusmoterprofilePath
-    }
+    };
   } else if (role === 'Business Owner') {
     const companyDocpath = req.file?.path;
     updatedFields = {
@@ -69,11 +76,21 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
       companyPhone,
       companyLicenseNo,
       companyAddress,
-      companyDoc: companyDocpath
-    }
+      Categories,
+      companyDoc: companyDocpath,
+      companyType
+    };
   } else if (role === 'Truck Driver') {
     const TruckprofilePath = req.file?.path;
-    updatedFields = { fullName, phoneNo, dob, bio, gender , photo: TruckprofilePath }
+    updatedFields = {
+      fullName,
+      phoneNo,
+      dob,
+      bio,
+      gender,
+      photo: TruckprofilePath,
+      companyType
+    };
     User.photo = TruckprofilePath;
   } else {
     return next(new AppError('Invalid user role', 400));

@@ -5,19 +5,20 @@ const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
 
 const createcategory = catchAsync(async (req, res, next) => {
-    const { name, subcategories } = req.body;
+    const { name, subcategories ,role} = req.body;
     const newcategory = new Category({
         name,
-        subcategories
+        subcategories,
+        role
       });
         await newcategory.save();
     res.status(201).json({ message: 'category created successfully' });
 });
 const Updatecategory = catchAsync(async (req, res, next) => {
-    const { name, subcategories } = req.body;
+    const { name, subcategories ,role} = req.body;
    const updateCategory =  await  Category.findByIdAndUpdate(
         req.params.id,
-        { $set: { name, subcategories } },
+        { $set: { name, subcategories ,role} },
         { new: true },)
     res.status(201).json({ 
         message: 'Update category successfully',

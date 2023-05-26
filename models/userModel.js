@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
   photo: String,
   role: {
     type: String,
-    enum: ['Customer', 'Business Owner', 'Manager', 'Admin','Truck Driver'],
+    enum: ['Customer', 'Storage Owner', ,'Business Owner','Service Provider', 'Admin','Truck Driver'],
     default: 'Customer'
   },
   password: {
@@ -78,7 +78,8 @@ const userSchema = new mongoose.Schema({
   },
   Categories:    [{type: mongoose.Schema.ObjectId,ref: 'Category'}],
   subCategories: [{type: mongoose.Schema.ObjectId,ref: 'Category'}],
-  cards: [{ type: String }],
+  truckType:[{type: String }],
+  cards: [{type: String }],
   passwordChangedAt: Date,
   otp: String,
   otpExpireTime: Date
@@ -90,23 +91,18 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
-
-
-
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
-
 userSchema.methods.correctotp = async function (
   candidatePassword,
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
-
 userSchema.methods.createotp = async function () {
   const otp = `${Math.floor(1000 + Math.random() * 900)}`
   const hashotp = await bcrypt.hash(otp, 12);
@@ -114,19 +110,15 @@ userSchema.methods.createotp = async function () {
   this.otpExpireTime = Date.now() + 10 * 60 * 1000;
   return otp;
 };
-
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
-
 userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });
   next();
 });
-
-
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
