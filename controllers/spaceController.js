@@ -209,8 +209,6 @@ const getUserSpaces = async (req, res, next) => {
         return next(new AppError('Error finding spaces', 500));
     };
 
-    console.log(userDetails);
-
     if (!userDetails) {
         return next(new AppError('No user found against id', 404));
     }
