@@ -5,24 +5,24 @@ const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
 
 const createcategory = catchAsync(async (req, res, next) => {
-    const { name, subcategories ,role} = req.body;
+    const { name, subcategories, role } = req.body;
     const newcategory = new Category({
         name,
         subcategories,
         role
-      });
-        await newcategory.save();
+    });
+    await newcategory.save();
     res.status(201).json({ message: 'category created successfully' });
 });
 const Updatecategory = catchAsync(async (req, res, next) => {
-    const { name, subcategories ,role} = req.body;
-   const updateCategory =  await  Category.findByIdAndUpdate(
+    const { name, subcategories, role } = req.body;
+    const updateCategory = await Category.findByIdAndUpdate(
         req.params.id,
-        { $set: { name, subcategories ,role} },
+        { $set: { name, subcategories, role } },
         { new: true },)
-    res.status(201).json({ 
+    res.status(201).json({
         message: 'Update category successfully',
-        category:updateCategory
+        category: updateCategory
     });
 });
 const getAllcategory = factory.getAll(Category)
@@ -78,28 +78,30 @@ const categoryDetails = async (req, res, next) => {
 };
 
 const addSubcategory = catchAsync(async (req, res, next) => {
-    const {cat_id ,name} = req.body;
-   const updateSubcategory =  await  Category.updateOne(
-        { _id:  cat_id},   
-        { $push: {
-            subcategories:{
-                $each:[{name:name}]
+    const { cat_id, name } = req.body;
+    const updateSubcategory = await Category.updateOne(
+        { _id: cat_id },
+        {
+            $push: {
+                subcategories: {
+                    $each: [{ name: name }]
+                }
             }
-        }},
+        },
         { new: true }
-        )
-    res.status(200).json({ 
+    )
+    res.status(200).json({
         message: ' Added subcategory successfully',
     });
 });
 const updateSubcategory = catchAsync(async (req, res, next) => {
-    const {cat_id , sub_cat_id ,name} = req.body;
-   const updateSubcategory =  await  Category.updateOne(
-        { _id:  cat_id ,'subcategories._id': sub_cat_id},   
-        { $set: {"subcategories.$.name": name }},
+    const { cat_id, sub_cat_id, name } = req.body;
+    const updateSubcategory = await Category.updateOne(
+        { _id: cat_id, 'subcategories._id': sub_cat_id },
+        { $set: { "subcategories.$.name": name } },
         { new: true }
-        )
-    res.status(201).json({ 
+    )
+    res.status(201).json({
         message: ' updated subcategory successfully',
     });
 });
@@ -107,15 +109,29 @@ const updateSubcategory = catchAsync(async (req, res, next) => {
 const deleteSubcategory = catchAsync(async (req, res, next) => {
     const cat_id = req.params.cat_id;
     const sub_cat_id = req.params.sub_cat_id;
-   const deleteCategory =  await  Category.update(
-        { _id:  cat_id },
-        { $pull: { subcategories: { _id: sub_cat_id} } },
-        {multi:true}
-        )
-    res.status(200).json({ 
+    const deleteCategory = await Category.update(
+        { _id: cat_id },
+        { $pull: { subcategories: { _id: sub_cat_id } } },
+        { multi: true }
+    )
+    res.status(200).json({
         message: 'Delete subcategory successfully'
     });
 });
+
+const getRoleCategory = async (req, res, next) => {
+    const { role } = req.query;
+    let roleCategory;
+    try {
+        roleCategory = await Category.findOne({ role });
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching data', 500));
+    }
+
+    res.json({ roleCategory });
+};
+
 exports.createcategory = createcategory;
 exports.getAllcategory = getAllcategory;
 exports.deletecategory = deletecategory;
@@ -124,4 +140,5 @@ exports.Updatecategory = Updatecategory;
 exports.addSubcategory = addSubcategory;
 exports.updateSubcategory = updateSubcategory;
 exports.deleteSubcategory = deleteSubcategory;
+exports.getRoleCategory = getRoleCategory;
 

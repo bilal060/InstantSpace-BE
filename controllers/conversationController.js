@@ -79,7 +79,7 @@ const get_user_conversations = async (req, res, next) => {
     try {
         userConversations = await Conversation.find({
             members: { $in: [req.params.userId] }
-        });
+        }).populate('members');
     } catch (error) {
         console.log(error);
         return next(new AppError('Error getting user conversations', 500));

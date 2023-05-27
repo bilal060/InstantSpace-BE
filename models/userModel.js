@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
   photo: String,
   role: {
     type: String,
-    enum: ['Customer', 'Storage Owner', ,'Business Owner','Service Provider', 'Admin','Truck Driver'],
+    enum: ['Customer', 'Storage Owner', 'Service Provider', 'Admin', 'Truck Driver'],
     default: 'Customer'
   },
   password: {
@@ -76,10 +76,10 @@ const userSchema = new mongoose.Schema({
     default: false,
     select: false,
   },
-  Categories:    [{type: mongoose.Schema.ObjectId,ref: 'Category'}],
-  subCategories: [{type: mongoose.Schema.ObjectId,ref: 'Category'}],
-  truckType:[{type: String }],
-  cards: [{type: String }],
+  Categories: [{ type: mongoose.Schema.ObjectId, ref: 'Category' }],
+  subCategories: [{ type: mongoose.Schema.ObjectId, ref: 'Category' }],
+  truckType: [{ type: String }],
+  cards: [{ type: String }],
   passwordChangedAt: Date,
   otp: String,
   otpExpireTime: Date

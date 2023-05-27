@@ -7,15 +7,15 @@ const router = express.Router();
 const checkPhoto = require('../Helper/photoUpload')
 router.post('/signup', authController.signup);
 router.post('/verifyotp',
-[
-  check('email')
-    .not()
-    .isEmpty(),
-  check('otp')
-    .not()
-    .isEmpty()
-],
- authController.verifyOTP);
+  [
+    check('email')
+      .not()
+      .isEmpty(),
+    check('otp')
+      .not()
+      .isEmpty()
+  ],
+  authController.verifyOTP);
 router.post(
   '/add_card',
   authController.protect,
@@ -48,6 +48,9 @@ router.post(
   '/login',
   [
     check('email')
+      .not()
+      .isEmpty(),
+    check('role')
       .not()
       .isEmpty(),
     check('password')
