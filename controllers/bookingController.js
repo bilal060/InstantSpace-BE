@@ -22,7 +22,7 @@ const Booking = require('../models/bookingModel');
 const createBooking = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return next(new AppError('Invalid data received', 422));
+        return next(new AppError('Invalid data received', 422));           
     }
 
     const { userId, spaceId } = req.body;
