@@ -82,7 +82,8 @@ const userSchema = new mongoose.Schema({
   cards: [{ type: String }],
   passwordChangedAt: Date,
   otp: String,
-  otpExpireTime: Date
+  otpExpireTime: Date,
+  customerId: { type: String, default: '' }
 });
 
 userSchema.pre('save', async function (next) {
