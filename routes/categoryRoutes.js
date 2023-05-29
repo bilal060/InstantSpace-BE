@@ -12,23 +12,25 @@ router
     check('subcategories.*.name').not().isEmpty()
   ], categoryController.createcategory);
 
+router.get('/specific', categoryController.getRoleCategory);
+
 router
   .route('/:id')
   .get(categoryController.getcategory)
   .patch([
     check('name').not().isEmpty(),
     check('subcategories.*.name').not().isEmpty()
-  ],categoryController.Updatecategory)
+  ], categoryController.Updatecategory)
   .delete(categoryController.deletecategory);
 
-  // sub category
-  router
+// sub category
+router
   .route('/subcategory/addSubcategory')
   .put(categoryController.addSubcategory);
-  router
+router
   .route('/subcategory/update')
   .put(categoryController.updateSubcategory);
-  router
+router
   .route('/subcategory/:cat_id/:sub_cat_id')
   .delete(categoryController.deleteSubcategory);
 

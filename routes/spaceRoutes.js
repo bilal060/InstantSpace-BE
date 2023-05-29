@@ -15,11 +15,16 @@ router.get('/space/:uid', authController.protect, spaceController.getUserSpaces)
 
 router.post('/add_space', authController.protect, spaceUpload.any('space_imgs'), [
     check('userId').not().isEmpty(),
-    check('category').isString().isIn(['Truck', 'Car', 'Warehouse', 'Storage']).withMessage('Enter correct category value').not().isEmpty(),
+    check('categoryId').not().isEmpty(),
+    check('subCategoryId').not().isEmpty(),
     check('area').isString().not().isEmpty(),
     check('contact').isString().not().isEmpty(),
     check('security').optional({ checkFalsy: true }).isString().not().isEmpty(),
     check('cameras').isString().not().isEmpty(),
+    check('ownerSite').isString().not().isEmpty(),
+    check('paidStaff').isString().not().isEmpty(),
+    check('paidSecurity').isString().not().isEmpty(),
+    check('climateControl').isString().not().isEmpty(),
     check('capacity').isString().not().isEmpty(),
     check('fuel').optional({ checkFalsy: true }).isString().not().isEmpty(),
     check('rate_hour').isInt().not().isEmpty(),

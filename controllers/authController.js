@@ -33,7 +33,7 @@ const signToken = id => {
 const createSendToken = (user, statusCode, res, message) => {
   const token = signToken(user._id);
   const cookieOptions = {
-      expires: new Date(
+    expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true
@@ -104,15 +104,25 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res, message)
 })
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body
+  const { email, password, role } = req.body
   if (!(email, password)) {
     return next(new AppError('please provide email and password !', 400))
   }
-  const user = await User.findOne({ email }).select('+password +isTrue')
-  if (!user || !await user.correctPassword(password, user.password)) {
-    return next(new AppError('Incorrect email or password! or please verify again', 401))
+
+  let user;
+  if (role === 'Customer') {
+    user = await User.findOne({ email, role: 'Customer' }).select('+password +isTrue')
   }
-  if (!user.isTrue ) {
+  else {
+    user = await User.findOne({ email, role: { $ne: 'Customer' } }).select('+password +isTrue')
+  }
+  if (!user) {
+    return next(new AppError(`This email is not registered as ${role} or register new account`, 401));
+  }
+  if (!await user.correctPassword(password, user.password)) {
+    return next(new AppError('Incorrect email or password! or please try again', 401))
+  }
+  if (!user.isTrue) {
     return next(new AppError('You are not verify Please verify again!', 401))
   }
   createSendToken(user, 200, res)
@@ -182,7 +192,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
     return next(new AppError('Your current password is wrong.', 401));
   }
-  const {password ,passwordConfirm } = req.body
+  const { password, passwordConfirm } = req.body
   user.password = password
   user.passwordConfirm = passwordConfirm
   await user.save();
