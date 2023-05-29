@@ -53,18 +53,22 @@ const createSendToken = (user, statusCode, res, message) => {
 };
 exports.signup = catchAsync(async (req, res) => {
   const { email, password, role, passwordConfirm, categories, companyType } = req.body;
+  const srtipe = await stripe.customers.create({
+    description: `${email} customer Id`,
+  });
   const user = new User({
     email,
     password,
     role,
     passwordConfirm,
-    companyType
+    companyType,
+    customerId:srtipe.id
   });
 
   if (categories) {
     user.Categories = categories;
   }
-  const ResetOtp = await user.createotp()
+  const ResetOtp = await user.createotp();
   await user.save();
   const message = `Please Vierify your Account with This OTP ${ResetOtp}.`
   try {
