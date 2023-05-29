@@ -5,6 +5,7 @@ const authController = require('./../controllers/authController');
 const passport = require('../utils/passport');
 const router = express.Router();
 const checkPhoto = require('../Helper/photoUpload')
+
 router.post('/signup', authController.signup);
 router.post('/verifyotp',
   [
