@@ -114,19 +114,8 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   let user;
-  if (role === 'Customer') {
-    user = await User.findOne({ email, role: 'Customer' }).select('+password +isTrue')
-  }
-  else if (role === 'Manager') {
-    user = await User.findOne({ email, role: 'Manager' }).select('+password +isTrue')
-  }
-  else {
-    user = await User.findOne({ email, role: { $ne: 'Customer' } }).select('+password +isTrue')
-  }
-  if (!user) {
-    return next(new AppError(`This email is not registered as ${role} or register new account`, 401));
-  }
-  if (!await user.correctPassword(password, user.password)) {
+  user = await User.findOne({ email }).select('+password +isTrue')
+  if (!user || !await user.correctPassword(password, user.password)) {
     return next(new AppError('Incorrect email or password! or please try again', 401))
   }
   if (!user.isTrue) {

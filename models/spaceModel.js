@@ -24,6 +24,10 @@ const spaceSchema = new Schema({
     description: { type: String },
     images: [{ type: String }],
     available: { type: Boolean, default: true },
+    managers: [{
+        managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        slot: { type: String },
+    }],
     reviews: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         review: { type: String },
