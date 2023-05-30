@@ -9,7 +9,7 @@ const spaceSchema = new Schema({
     area: { type: String },
     contact: { type: String },
     security: { type: String },
-    cameras: { type: String },
+    cameras: { type: Boolean },
     ownerSite: { type: Boolean, required: true },
     paidStaff: { type: Boolean, required: true },
     paidSecurity: { type: Boolean, required: true },
