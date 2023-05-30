@@ -62,7 +62,7 @@ exports.signup = catchAsync(async (req, res) => {
     role,
     passwordConfirm,
     companyType,
-    customerId:srtipe.id
+    customerId: srtipe.id
   });
 
   if (categories) {
@@ -116,6 +116,9 @@ exports.login = catchAsync(async (req, res, next) => {
   let user;
   if (role === 'Customer') {
     user = await User.findOne({ email, role: 'Customer' }).select('+password +isTrue')
+  }
+  else if (role === 'Manager') {
+    user = await User.findOne({ email, role: 'Manager' }).select('+password +isTrue')
   }
   else {
     user = await User.findOne({ email, role: { $ne: 'Customer' } }).select('+password +isTrue')
