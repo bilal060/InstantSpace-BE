@@ -7,6 +7,13 @@ const router = express.Router();
 const checkPhoto = require('../Helper/photoUpload')
 
 router.post('/signup', authController.signup);
+router.post('/manager/invitation', [
+  check('fullName').not().isEmpty(),
+  check('email').not().isEmpty(),
+  check('phoneNo').not().isEmpty(),
+  check('branch').isString().not().isEmpty(),
+  check('slot').not().isEmpty(),
+], authController.signup);
 router.post('/verifyotp',
   [
     check('email')
@@ -49,9 +56,6 @@ router.post(
   '/login',
   [
     check('email')
-      .not()
-      .isEmpty(),
-    check('role')
       .not()
       .isEmpty(),
     check('password')

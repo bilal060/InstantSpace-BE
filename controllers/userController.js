@@ -1,7 +1,10 @@
 const AppError = require('../utils/appError');
 const User = require('./../models/userModel');
+const Space = require('./../models/spaceModel');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
+const bcrypt = require('bcrypt');
+const sendEmail = require('../utils/email');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -121,6 +124,68 @@ exports.signupWithGoogle = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
   res.status(200).json({ user: user });
 });
+
+exports.managerInvitation = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new AppError('Invalid data received', 422));
+  }
+
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: req.body.email });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching data', 500));
+  };
+
+  if (existingUser) {
+    return next(new AppError('Email already exists', 401));
+  }
+
+  let existingSpace;
+  try {
+    existingSpace = await Space.findById(req.body.branch);
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching data', 500));
+
+  }
+
+  if (!existingSpace) {
+    return next(new AppError('No branch found', 404));
+  }
+
+  const token = Math.floor(1000 + Math.random() * 9000);
+
+  let hashedToken;
+  try {
+    hashedToken = await bcrypt.hash(token, 12);
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error sending invitation', 500));
+  }
+
+  const message = `Click the link to create your account $`
+
+  try {
+    await sendEmail({
+      email: req.body.email,
+      subject: 'Manager Invitation',
+      message
+    })
+    res.status(200).json({
+      status: 'success',
+      message: 'OTP send into email'
+    });
+  } catch (err) {
+    user.userValidotp = undefined;
+    await user.save({ validateBeforeSave: false });
+    return (new AppError('somting wrong to send email ', 500))
+  }
+
+};
+
 exports.deleteUser = factory.deleteOne(User);
 exports.updateUser = factory.updateOne(User);
 exports.createUser = factory.createOne(User);
