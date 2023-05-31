@@ -128,7 +128,7 @@ const updateSpace = async (req, res, next) => {
 const getAllSpaces = async (req, res, next) => {
     let allSpaces;
     try {
-        allSpaces = await Space.find({});
+        allSpaces = await Space.find({}).populate('userId');
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error fetching spaces', 500));
