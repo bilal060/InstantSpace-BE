@@ -48,7 +48,7 @@ const get_conversation_messages = async (req, res, next) => {
     try {
         messages = await Message.find({
             conversationId: req.params.conversationId
-        })
+        }).populate('conversationId');
     } catch (error) {
         console.log(error);
         return next(new AppError('Error getting messages', 500));
