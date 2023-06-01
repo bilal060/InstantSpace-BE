@@ -47,7 +47,7 @@ it checks the user's role and updates the user's profile accordingly. If the use
 recognized, it returns an error. Finally, it updates the user's profile in the database and returns
 a success message with the updated user object. */
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
-  console.log(req.body.field);
+  console.log("Field", req.body.field);
   const {
     fullName,
     phoneNo,
@@ -94,7 +94,7 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
     }
   }
   else {
-    return next(new AppError('Invalid user role', 400));
+    return next(new AppError('Invalid fields', 400));
   }
   const user = await User.findByIdAndUpdate(req.user.id, updatedFields, {
     new: true
