@@ -47,6 +47,7 @@ it checks the user's role and updates the user's profile accordingly. If the use
 recognized, it returns an error. Finally, it updates the user's profile in the database and returns
 a success message with the updated user object. */
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
+  console.log(req.body.field);
   const {
     fullName,
     phoneNo,
@@ -56,14 +57,12 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
     companyPhone,
     companyLicenseNo,
     companyAddress,
-    gender,
-    Categories,
     companyType
   } = req.body;
   const { role } = req.user;
   const options = { validateBeforeSave: false };
   let updatedFields = {};
-  if (role === 'Customer') {
+  if (req.body.field === 'Personal' && (role === 'Customer' || role === 'Storage Owner' || role === 'Truck Driver')) {
     const CusmoterprofilePath = req.file?.path;
     updatedFields = {
       fullName,
@@ -72,30 +71,29 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
       bio,
       photo: CusmoterprofilePath
     };
-  } else if (role === 'Business Owner') {
-    const companyDocpath = req.file?.path;
-    updatedFields = {
-      companyName,
-      companyPhone,
-      companyLicenseNo,
-      companyAddress,
-      Categories,
-      companyDoc: companyDocpath,
-      companyType
-    };
-  } else if (role === 'Truck Driver') {
-    const TruckprofilePath = req.file?.path;
-    updatedFields = {
-      fullName,
-      phoneNo,
-      dob,
-      bio,
-      gender,
-      photo: TruckprofilePath,
-      companyType
-    };
-    User.photo = TruckprofilePath;
-  } else {
+  } else if (req.body.field === 'CompanyInfo') {
+    if (role === 'Truck Driver') {
+      updatedFields = {
+        truckType,
+        drivingLicense,
+        driverAddress,
+        licensePhoto: req.file?.path
+      };
+    }
+    else if (role === 'Storage Owner') {
+      const companyDocpath = req.file?.path;
+      updatedFields = {
+        companyName,
+        companyPhone,
+        companyLicenseNo,
+        companyAddress,
+        // Categories,
+        companyDoc: companyDocpath,
+        companyType
+      };
+    }
+  }
+  else {
     return next(new AppError('Invalid user role', 400));
   }
   const user = await User.findByIdAndUpdate(req.user.id, updatedFields, {
