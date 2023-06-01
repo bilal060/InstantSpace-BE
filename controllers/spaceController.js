@@ -137,6 +137,20 @@ const getAllSpaces = async (req, res, next) => {
     res.json({ spaces: allSpaces });
 };
 
+const getSpacesBySubcatId = async (req, res, next) => {
+    const subcatId = req.params.subcatId;
+
+    let subcatSpaces;
+    try {
+        subcatSpaces = await Space.find({ subCategoryId: subcatId });
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching records', 500));
+    }
+
+    res.json({ subcatSpaces });
+};
+
 /**
  * This function retrieves a single space by its ID and returns it as a JSON object in the response.
  * @param req - req stands for request and it is an object that contains information about the HTTP
@@ -301,4 +315,5 @@ exports.getUserSpaces = getUserSpaces;
 exports.addReview = addReview;
 exports.updateSpace = updateSpace;
 exports.deleteSpace = deleteSpace;
+exports.getSpacesBySubcatId = getSpacesBySubcatId;
 
