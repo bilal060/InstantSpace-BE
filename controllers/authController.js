@@ -119,7 +119,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password! or please try again', 401))
   }
   if (!user.isTrue) {
-    return next(new AppError('You are not verify Please verify again!', 401))
+    return next(new AppError('You are not verified Please verify again!', 401))
   }
   createSendToken(user, 200, res)
 }
