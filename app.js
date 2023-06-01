@@ -7,6 +7,7 @@ const messageRouter = require('./routes/messageRoutes');
 const spaceRouter = require('./routes/spaceRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
+const vehicleRouter = require('./routes/vehicleRoutes');
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const mongoSanitize = require('express-mongo-sanitize')
@@ -66,6 +67,7 @@ app.use('/uploads/chat', express.static(path.join('uploads', 'chat')));
 app.use('/uploads/space', express.static(path.join('uploads', 'space')));
 app.use('/uploads/docs', express.static(path.join('uploads', 'docs')));
 app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
+app.use('/uploads/vehicle', express.static(path.join('uploads', 'vehicle')));
 app.use('/uploads/driverProfile', express.static(path.join('uploads', 'driverProfile')));
 
 app.use((req, res, next) => {
@@ -84,6 +86,7 @@ app.use('/api/v1/messages', messageRouter);
 app.use('/api/v1/spaces', spaceRouter);
 app.use('/api/v1/bookings', bookingRouter);
 app.use('/api/v1/category', categoryRouter);
+app.use('/api/v1/vehicle', vehicleRouter);
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
 })
