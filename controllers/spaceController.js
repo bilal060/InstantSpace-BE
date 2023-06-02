@@ -31,16 +31,21 @@ const addNewSpace = async (req, res, next) => {
 
     let coordinates;
     try {
-        coordinates = await getCoordsOfAddress(address);
-        console.log(coordinates);
+        coordinates = await getCoordsOfAddress(req.body.location);
     } catch (error) {
         return next(error);
     }
+
+    const location = {
+        address: req.body.location,
+        coordinates
+    };
 
     const imagesPath = req?.files.map(img => img.path);
 
     const newSpace = new Space({
         ...req.body,
+        location,
         images: imagesPath
     });
 
