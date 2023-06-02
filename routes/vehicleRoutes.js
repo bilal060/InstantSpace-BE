@@ -9,9 +9,10 @@ const router = express.Router();
 
 router.get('/', authController.protect, vehicleController.getAllVehicles);
 
-router.get('/:sid', authController.protect, vehicleController.getSingleVehicle);
+router.get('/single-vehicle/:sid', authController.protect, vehicleController.getSingleVehicle);
 
-router.get('/:uid', authController.protect, vehicleController.getUserVehicles);
+router.get('/user/:uid', authController.protect, vehicleController.getUserVehicles);
+
 router.delete('/:vid', authController.protect, vehicleController.deleteVehicle);
 
 router.post('/add_vehicle', authController.protect, vehicleUpload.any('vehicle_imgs'), [
