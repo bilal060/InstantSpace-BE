@@ -5,6 +5,8 @@ const Space = require('../models/spaceModel');
 const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
 
+const getCoordsOfAddress = require('../Helper/location');
+
 /**
  * This function adds a new space to a database with images and returns a success message or an error
  * message if there are any issues.
@@ -25,6 +27,14 @@ const addNewSpace = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return next(new AppError('Invalid data received', 422));
+    }
+
+    let coordinates;
+    try {
+        coordinates = await getCoordsOfAddress(address);
+        console.log(coordinates);
+    } catch (error) {
+        return next(error);
     }
 
     const imagesPath = req?.files.map(img => img.path);
