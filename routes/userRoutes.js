@@ -7,6 +7,9 @@ const router = express.Router();
 const checkPhoto = require('../Helper/photoUpload')
 
 router.post('/signup', authController.signup);
+router.post('/google-login', [
+  check('token').not().isEmpty()
+], authController.googleLogin);
 router.post('/manager/invitation', [
   check('fullName').not().isEmpty(),
   check('email').not().isEmpty(),
