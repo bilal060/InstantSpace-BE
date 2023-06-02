@@ -15,7 +15,7 @@ router.get('/single_space/:sid', authController.protect, spaceController.getSing
 
 router.get('/space/:uid', authController.protect, spaceController.getUserSpaces);
 
-router.post('/add_space', authController.protect, spaceUpload.any('space_imgs'), [
+router.post('/add_space', spaceUpload.any('space_imgs'), [
     check('userId').not().isEmpty(),
     check('categoryId').not().isEmpty(),
     check('subCategoryId').not().isEmpty(),
