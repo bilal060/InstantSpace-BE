@@ -63,19 +63,19 @@ const limiter = rateLimit({
   message: 'To many request from this IP now please wait for an hour!'
 })
 
-app.use('/uploads/chat', express.static(path.join('uploads', 'chat')));
-app.use('/uploads/space', express.static(path.join('uploads', 'space')));
-app.use('/uploads/docs', express.static(path.join('uploads', 'docs')));
-app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
-app.use('/uploads/vehicle', express.static(path.join('uploads', 'vehicle')));
-app.use('/uploads/driverProfile', express.static(path.join('uploads', 'driverProfile')));
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE')
   next();
 });
+
+app.use('/uploads/chat', express.static(path.join('uploads', 'chat')));
+app.use('/uploads/space', express.static(path.join('uploads', 'space')));
+app.use('/uploads/docs', express.static(path.join('uploads', 'docs')));
+app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
+app.use('/uploads/vehicle', express.static(path.join('uploads', 'vehicle')));
+app.use('/uploads/driverProfile', express.static(path.join('uploads', 'driverProfile')));
 
 app.use('/api', limiter)
 app.use(express.json({ limit: '10kb' }));
