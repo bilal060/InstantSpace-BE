@@ -5,6 +5,7 @@ const authController = require('./../controllers/authController');
 const passport = require('../utils/passport');
 const router = express.Router();
 const checkPhoto = require('../Helper/photoUpload')
+const profileUpload = require('../middlewares/profile-upload');
 
 router.post('/signup', authController.signup);
 router.post('/google-login', [
@@ -46,6 +47,7 @@ router.patch(
   checkPhoto.photoUpload,
   userController.updateUserProfile
 );
+
 router.get(
   '/signup/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
