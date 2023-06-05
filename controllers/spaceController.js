@@ -145,13 +145,13 @@ const getAllSpaces = async (req, res, next) => {
     let updated;
     try {
         allSpaces = await Space.find({}).populate('userId', 'email fullName').populate('categoryId');
-        updated = allSpaces.filter((key)=>{
-           key.categoryId.subcategories.filter((subkey)=>{
-                if(subkey._id.toString() == key.subCategoryId.toString()){
+        updated = allSpaces.filter((key) => {
+            key.categoryId.subcategories.filter((subkey) => {
+                if (subkey._id.toString() == key.subCategoryId.toString()) {
                     return key.categoryId.subcategories = subkey;
                 }
             });
-             
+
             return key;
         })
 
@@ -242,6 +242,7 @@ const getUserSpaces = async (req, res, next) => {
     const uid = req.params.uid;
 
     let userDetails;
+    let updated;
     try {
         userDetails = await User.findById(uid);
     } catch (error) {
@@ -255,13 +256,22 @@ const getUserSpaces = async (req, res, next) => {
 
     let allSpaces;
     try {
-        allSpaces = await Space.find({ userId: uid });
+        allSpaces = await Space.find({ userId: uid }).populate('userId', 'email fullName').populate('categoryId');
+        updated = allSpaces.filter((key) => {
+            key.categoryId.subcategories.filter((subkey) => {
+                if (subkey._id.toString() == key.subCategoryId.toString()) {
+                    return key.categoryId.subcategories = subkey;
+                }
+            });
+
+            return key;
+        })
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error finding spaces', 500));
     };
 
-    res.json({ spaces: allSpaces });
+    res.json({ spaces: updated });
 };
 
 /**
