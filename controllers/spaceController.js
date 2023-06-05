@@ -146,7 +146,7 @@ const getAllSpaces = async (req, res, next) => {
     try {
         allSpaces = await Space.find({}).populate('userId', 'email fullName').populate('categoryId');
         updated = allSpaces.filter((key)=>{
-          const sub =  key.categoryId.subcategories.filter((subkey)=>{
+           key.categoryId.subcategories.filter((subkey)=>{
                 if(subkey._id.toString() == key.subCategoryId.toString()){
                     return key.categoryId.subcategories = subkey;
                 }
