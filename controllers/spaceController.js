@@ -142,14 +142,25 @@ const updateSpace = async (req, res, next) => {
  */
 const getAllSpaces = async (req, res, next) => {
     let allSpaces;
+    let updated;
     try {
         allSpaces = await Space.find({}).populate('userId', 'email fullName').populate('categoryId');
+        updated = allSpaces.filter((key)=>{
+          const sub =  key.categoryId.subcategories.filter((subkey)=>{
+                if(subkey._id.toString() == key.subCategoryId.toString()){
+                    return key.categoryId.subcategories = subkey;
+                }
+            });
+             
+            return key;
+        })
+
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error fetching spaces', 500));
     };
 
-    res.json({ spaces: allSpaces });
+    res.json({ spaces: updated });
 };
 
 const getSpacesBySubcatId = async (req, res, next) => {
