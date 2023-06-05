@@ -44,6 +44,13 @@ router.post(
 router.patch(
   '/UpdateUserProfile',
   authController.protect,
+  profileUpload.single('profile_img'),
+  userController.updateUserProfile
+);
+
+router.patch(
+  '/UpdatePersonalProfile',
+  authController.protect,
   checkPhoto.photoUpload,
   userController.updateUserProfile
 );
