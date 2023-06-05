@@ -15,6 +15,7 @@ const hpp = require('hpp')
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 const app = express();
+
 const session = require('express-session');
 const passport = require('passport');
 const bodyParser = require('body-parser');
@@ -91,7 +92,19 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
 })
 app.use(globalErrorHandler)
-
+// io.on("connection", (socket) => {
+//   console.log("userConnected");
+  // socket.on("join", async ({ userId }) => {
+  //   let sockets = await Socket.find({ userId });
+  //   if (!sockets.includes(socket.id)) {
+  //     await Socket.updateOne(
+  //       { userId, socketId: socket.id },
+  //       { socketId: socket.id },
+  //       { upsert: true }
+  //     );
+  //   }
+  // }); 
+// });
 module.exports = app;
 
 

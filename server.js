@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 mongoose.set('debug', false);
 const dotenv = require('dotenv');
+const io = require('./socket');
 // process.on('uncaughtException', err=>{
 //   console.log(err.name,err.message)
 //   console.log('UNHANDLED REJECTION SERVER SHUTTING DOWN!')
