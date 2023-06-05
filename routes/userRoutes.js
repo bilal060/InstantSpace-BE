@@ -49,10 +49,10 @@ router.patch(
 );
 
 router.patch(
-  '/UpdatePersonalProfile',
+  '/UpdateCompanyProfile',
   authController.protect,
   checkPhoto.photoUpload,
-  userController.updateUserProfile
+  userController.updateUserCompany
 );
 
 router.get(

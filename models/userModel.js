@@ -28,9 +28,6 @@ const userSchema = new mongoose.Schema({
   companyName: {
     type: String,
   },
-  gender: {
-    type: String,
-  },
   companyDoc: {
     type: String,
   },
