@@ -36,17 +36,17 @@ io.on("connection", (socket) => {
     }
   }); 
 
-    //send and get message
-    socket.on("sendMessage", async ({ senderId, receiverId, message }) => {  
-      let sockets = await Socket.find({ userId: receiverId });  
-      for (let Socket of sockets) {
-        io.to(Socket.socketId).emit("getMessage", {
-          receiverId,
-          senderId,
-          message,
-        });
-      }
-    });
+  //send and get message
+  socket.on("sendMessage", async ({ senderId, receiverId, message }) => {  
+    let sockets = await Socket.find({ userId: receiverId });  
+    for (let Socket of sockets) {
+      io.to(Socket.socketId).emit("getMessage", {
+        receiverId,
+        senderId,
+        message,
+      });
+    }
+  });
 
       //when disconnect
   socket.on("disconnect", () => {
