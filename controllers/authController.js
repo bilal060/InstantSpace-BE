@@ -3,14 +3,17 @@ const User = require('./../models/userModel');
 const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 const sendEmail = require('../utils/email');
-const bcrypt = require('bcrypt')
-const cookie = require('cookie')
+const { validationResult } = require('express-validator');
 const stripe = require('stripe')('sk_test_51N7wBGI06aS9z6rYIDfQ62UPHoTSjVFqHpW36GxstL0nh2QDGT3ugfuuVczNOMDUIj4bZ0QBEkZ5xIoP3ir2Hw8y00KhX7qHE6');
 
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv');
 const { log } = require('console');
 dotenv.config({ path: './config.env' });
+
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const signToken = id => {
   return jwt.sign(
     { id },
@@ -114,23 +117,12 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   let user;
-  if (role === 'Customer') {
-    user = await User.findOne({ email, role: 'Customer' }).select('+password +isTrue')
-  }
-  else if (role === 'Manager') {
-    user = await User.findOne({ email, role: 'Manager' }).select('+password +isTrue')
-  }
-  else {
-    user = await User.findOne({ email, role: { $ne: 'Customer' } }).select('+password +isTrue')
-  }
-  if (!user) {
-    return next(new AppError(`This email is not registered as ${role} or register new account`, 401));
-  }
-  if (!await user.correctPassword(password, user.password)) {
+  user = await User.findOne({ email }).select('+password +isTrue')
+  if (!user || !await user.correctPassword(password, user.password)) {
     return next(new AppError('Incorrect email or password! or please try again', 401))
   }
   if (!user.isTrue) {
-    return next(new AppError('You are not verify Please verify again!', 401))
+    return next(new AppError('You are not verified Please verify again!', 401))
   }
   createSendToken(user, 200, res)
 }
@@ -304,4 +296,25 @@ exports.deleteUserCard = async (req, res, next) => {
   }
 
   res.json({ message: 'Card deleted successfully' });
+};
+
+exports.googleLogin = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new AppError('Invalid data received', 422));
+  }
+
+  let payload;
+  try {
+    payload = await client.verifyIdToken({
+      idToken: req.body.token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error getting data', 500));
+  }
+
+  console.log({ payload });
+  res.send('ok');
 };

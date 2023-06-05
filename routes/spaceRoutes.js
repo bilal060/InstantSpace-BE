@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.get('/', authController.protect, spaceController.getAllSpaces);
 
+router.get('/cat-spaces/:subcatId', authController.protect, spaceController.getSpacesBySubcatId);
+
 router.get('/single_space/:sid', authController.protect, spaceController.getSingleSpace);
 
 router.get('/space/:uid', authController.protect, spaceController.getUserSpaces);

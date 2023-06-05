@@ -20,10 +20,14 @@ const spaceSchema = new Schema({
     rate_day: { type: Number },
     rate_week: { type: Number },
     rate_month: { type: Number },
-    location: { type: String },
+    location: { type: Object },
     description: { type: String },
     images: [{ type: String }],
     available: { type: Boolean, default: true },
+    managers: [{
+        managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        slot: { type: String },
+    }],
     reviews: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         review: { type: String },

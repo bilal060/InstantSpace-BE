@@ -5,6 +5,8 @@ const Space = require('../models/spaceModel');
 const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
 
+const getCoordsOfAddress = require('../Helper/location');
+
 /**
  * This function adds a new space to a database with images and returns a success message or an error
  * message if there are any issues.
@@ -27,10 +29,23 @@ const addNewSpace = async (req, res, next) => {
         return next(new AppError('Invalid data received', 422));
     }
 
+    let coordinates;
+    try {
+        coordinates = await getCoordsOfAddress(req.body.location);
+    } catch (error) {
+        return next(error);
+    }
+
+    const location = {
+        address: req.body.location,
+        coordinates
+    };
+
     const imagesPath = req?.files.map(img => img.path);
 
     const newSpace = new Space({
         ...req.body,
+        location,
         images: imagesPath
     });
 
@@ -128,13 +143,35 @@ const updateSpace = async (req, res, next) => {
 const getAllSpaces = async (req, res, next) => {
     let allSpaces;
     try {
-        allSpaces = await Space.find({});
+        allSpaces = await Space.find({}).populate('userId', 'email').populate('categoryId');
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error fetching spaces', 500));
     };
 
-    res.json({ spaces: allSpaces });
+    let compiledSpaces = [];
+
+    allSpaces.forEach(element => {
+        const filteredSubCat = element.categoryId.subcategories.find(subCat => subCat._id.toString() === element.subCategoryId.toString());
+        element.categoryId.subcategories = filteredSubCat;
+        compiledSpaces.push(element);
+    });
+
+    res.json({ spaces: compiledSpaces });
+};
+
+const getSpacesBySubcatId = async (req, res, next) => {
+    const subcatId = req.params.subcatId;
+
+    let subcatSpaces;
+    try {
+        subcatSpaces = await Space.find({ subCategoryId: subcatId });
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching records', 500));
+    }
+
+    res.json({ subcatSpaces });
 };
 
 /**
@@ -301,4 +338,5 @@ exports.getUserSpaces = getUserSpaces;
 exports.addReview = addReview;
 exports.updateSpace = updateSpace;
 exports.deleteSpace = deleteSpace;
+exports.getSpacesBySubcatId = getSpacesBySubcatId;
 

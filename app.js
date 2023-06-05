@@ -7,6 +7,7 @@ const messageRouter = require('./routes/messageRoutes');
 const spaceRouter = require('./routes/spaceRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
+const vehicleRouter = require('./routes/vehicleRoutes');
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const mongoSanitize = require('express-mongo-sanitize')
@@ -63,18 +64,19 @@ const limiter = rateLimit({
   message: 'To many request from this IP now please wait for an hour!'
 })
 
-app.use('/uploads/chat', express.static(path.join('uploads', 'chat')));
-app.use('/uploads/space', express.static(path.join('uploads', 'space')));
-app.use('/uploads/docs', express.static(path.join('uploads', 'docs')));
-app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
-app.use('/uploads/driverProfile', express.static(path.join('uploads', 'driverProfile')));
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE')
   next();
 });
+
+app.use('/uploads/chat', express.static(path.join('uploads', 'chat')));
+app.use('/uploads/space', express.static(path.join('uploads', 'space')));
+app.use('/uploads/docs', express.static(path.join('uploads', 'docs')));
+app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
+app.use('/uploads/vehicle', express.static(path.join('uploads', 'vehicle')));
+app.use('/uploads/driverProfile', express.static(path.join('uploads', 'driverProfile')));
 
 app.use('/api', limiter)
 app.use(express.json({ limit: '10kb' }));
@@ -85,6 +87,7 @@ app.use('/api/v1/messages', messageRouter);
 app.use('/api/v1/spaces', spaceRouter);
 app.use('/api/v1/bookings', bookingRouter);
 app.use('/api/v1/category', categoryRouter);
+app.use('/api/v1/vehicle', vehicleRouter);
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
 })
