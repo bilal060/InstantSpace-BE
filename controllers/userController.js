@@ -47,7 +47,28 @@ it checks the user's role and updates the user's profile accordingly. If the use
 recognized, it returns an error. Finally, it updates the user's profile in the database and returns
 a success message with the updated user object. */
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
-  console.log("Field", req.body.field);
+  console.log(req.body);
+
+  const options = { validateBeforeSave: false };
+  const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+    new: true
+  }).setOptions(options);
+
+  if (!user) {
+    return next(
+      new AppError("No User Find Please Double Check What's the Issue", 400)
+    );
+  }
+  res.status(200).json({
+    status: 'Success',
+    message: 'User Profile Update',
+    data: {
+      user
+    }
+  });
+});
+
+exports.updateUserCompany = catchAsync(async (req, res, next) => {
   const {
     fullName,
     phoneNo,
@@ -62,36 +83,26 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
   const { role } = req.user;
   const options = { validateBeforeSave: false };
   let updatedFields = {};
-  if (req.body.field === 'Personal' && (role === 'Customer' || role === 'Storage Owner' || role === 'Truck Driver')) {
-    const CusmoterprofilePath = req.file?.path;
+
+  if (role === 'Truck Driver') {
     updatedFields = {
-      fullName,
-      phoneNo,
-      dob,
-      bio,
-      photo: CusmoterprofilePath
+      truckType,
+      drivingLicense,
+      driverAddress,
+      licensePhoto: req.file?.path
     };
-  } else if (req.body.field === 'CompanyInfo') {
-    if (role === 'Truck Driver') {
-      updatedFields = {
-        truckType,
-        drivingLicense,
-        driverAddress,
-        licensePhoto: req.file?.path
-      };
-    }
-    else if (role === 'Storage Owner') {
-      const companyDocpath = req.file?.path;
-      updatedFields = {
-        companyName,
-        companyPhone,
-        companyLicenseNo,
-        companyAddress,
-        // Categories,
-        companyDoc: companyDocpath,
-        companyType
-      };
-    }
+  }
+  else if (role === 'Storage Owner') {
+    const companyDocpath = req.file?.path;
+    updatedFields = {
+      companyName,
+      companyPhone,
+      companyLicenseNo,
+      companyAddress,
+      // Categories,
+      companyDoc: companyDocpath,
+      companyType
+    };
   }
   else {
     return next(new AppError('Invalid fields', 400));
