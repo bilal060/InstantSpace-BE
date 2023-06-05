@@ -7,7 +7,7 @@ const spaceUpload = require('../middlewares/space-upload');
 
 const router = express.Router();
 
-router.get('/', authController.protect, spaceController.getAllSpaces);
+router.get('/', spaceController.getAllSpaces);
 
 router.get('/cat-spaces/:subcatId', authController.protect, spaceController.getSpacesBySubcatId);
 
