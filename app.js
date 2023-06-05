@@ -47,7 +47,9 @@ app.use(passport.session());
 app.use(checkForHTMLTags);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(helmet())
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}))
 app.use(mongoSanitize())
 app.use(hpp({
   whitelist: [
@@ -94,16 +96,16 @@ app.all('*', (req, res, next) => {
 app.use(globalErrorHandler)
 // io.on("connection", (socket) => {
 //   console.log("userConnected");
-  // socket.on("join", async ({ userId }) => {
-  //   let sockets = await Socket.find({ userId });
-  //   if (!sockets.includes(socket.id)) {
-  //     await Socket.updateOne(
-  //       { userId, socketId: socket.id },
-  //       { socketId: socket.id },
-  //       { upsert: true }
-  //     );
-  //   }
-  // }); 
+// socket.on("join", async ({ userId }) => {
+//   let sockets = await Socket.find({ userId });
+//   if (!sockets.includes(socket.id)) {
+//     await Socket.updateOne(
+//       { userId, socketId: socket.id },
+//       { socketId: socket.id },
+//       { upsert: true }
+//     );
+//   }
+// }); 
 // });
 module.exports = app;
 
