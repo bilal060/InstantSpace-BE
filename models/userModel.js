@@ -73,8 +73,6 @@ const userSchema = new mongoose.Schema({
     default: false,
     select: false,
   },
-  Categories: [{ type: mongoose.Schema.ObjectId, ref: 'Category' }],
-  subCategories: [{ type: mongoose.Schema.ObjectId, ref: 'Category' }],
   truckType: { type: String },
   drivingLicense: { type: String },
   driverAddress: { type: String },
