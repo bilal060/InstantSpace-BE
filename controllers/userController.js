@@ -190,7 +190,7 @@ exports.managerInvitation = async (req, res, next) => {
   })
 
   try {
-    await newManager.save();
+    await newManager.save({ validateBeforeSave: false });
   } catch (error) {
     console.log(error);
     return (new AppError('Error sending invitation', 500))
