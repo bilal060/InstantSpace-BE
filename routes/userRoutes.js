@@ -12,7 +12,7 @@ router.post('/google-login', [
   check('token').not().isEmpty()
 ], authController.googleLogin);
 
-router.post('/manager-invitation', [
+router.post('/manager-invitation', authController.protect, [
   check('fullName').not().isEmpty(),
   check('email').not().isEmpty(),
   check('phoneNo').not().isEmpty(),
