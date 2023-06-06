@@ -42,6 +42,8 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, 'Please provide a valid email']
   },
   photo: String,
+  branch: mongoose.Schema.Types.ObjectId,
+  slot: Object,
   role: {
     type: String,
     enum: ['Customer', 'Storage Owner', 'Service Provider', 'Admin', 'Truck Driver', 'Manager'],
@@ -49,13 +51,11 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
     minlength: 8,
     select: false
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Please confirm your password'],
     validate: {
       validator: function (el) {
         return el === this.password;
@@ -80,6 +80,7 @@ const userSchema = new mongoose.Schema({
   cards: [{ type: String }],
   passwordChangedAt: Date,
   otp: String,
+  managerToken: String,
   otpExpireTime: Date,
   customerId: { type: String, default: '' }
 });
