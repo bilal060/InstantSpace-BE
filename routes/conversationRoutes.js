@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/', authController.protect, conversationController.all_conversations);
 
-router.get('/:userId', authController.protect, conversationController.get_user_conversations);
+router.get('/:userId', conversationController.get_user_conversations);
 
 router.post('/', authController.protect, conversationController.new_conversation);
 
