@@ -11,13 +11,17 @@ router.post('/signup', authController.signup);
 router.post('/google-login', [
   check('token').not().isEmpty()
 ], authController.googleLogin);
-router.post('/manager/invitation', [
+
+router.post('/manager-invitation', [
   check('fullName').not().isEmpty(),
   check('email').not().isEmpty(),
   check('phoneNo').not().isEmpty(),
   check('branch').isString().not().isEmpty(),
-  check('slot').not().isEmpty(),
-], authController.signup);
+  check('slot').isObject().not().isEmpty(),
+], userController.managerInvitation);
+
+router.get('/verify-manager-invitation', userController.verifyInvitation);
+
 router.post('/verifyotp',
   [
     check('email')

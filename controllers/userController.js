@@ -5,6 +5,9 @@ const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
 const bcrypt = require('bcrypt');
 const sendEmail = require('../utils/email');
+const { validationResult } = require('express-validator');
+const dotenv = require('dotenv');
+dotenv.config({ path: '../config.env' });
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -152,6 +155,10 @@ exports.managerInvitation = async (req, res, next) => {
     return next(new AppError('Email already exists', 401));
   }
 
+  if (!req.body.branch.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new AppError('Invalid branch', 404));
+  }
+
   let existingSpace;
   try {
     existingSpace = await Space.findById(req.body.branch);
@@ -165,7 +172,7 @@ exports.managerInvitation = async (req, res, next) => {
     return next(new AppError('No branch found', 404));
   }
 
-  const token = Math.floor(1000 + Math.random() * 9000);
+  const token = Math.floor(1000 + Math.random() * 9000).toString();
 
   let hashedToken;
   try {
@@ -175,23 +182,38 @@ exports.managerInvitation = async (req, res, next) => {
     return next(new AppError('Error sending invitation', 500));
   }
 
-  const message = `Click the link to create your account $`
+  console.log(process.env.SERVER_BASE_URL);
 
-  try {
-    await sendEmail({
-      email: req.body.email,
-      subject: 'Manager Invitation',
-      message
-    })
-    res.status(200).json({
-      status: 'success',
-      message: 'OTP send into email'
-    });
-  } catch (err) {
-    user.userValidotp = undefined;
-    await user.save({ validateBeforeSave: false });
-    return (new AppError('somting wrong to send email ', 500))
-  }
+  const message = `Click the link to create your account ${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}`;
+
+  console.log({ message });
+
+  // try {
+  //   await sendEmail({
+  //     email: req.body.email,
+  //     subject: 'Manager Invitation',
+  //     message
+  //   })
+  //   res.status(200).json({
+  //     status: 'success',
+  //     message: 'OTP send into email'
+  //   });
+  // } catch (err) {
+  //   user.userValidotp = undefined;
+  //   await user.save({ validateBeforeSave: false });
+  //   return (new AppError('somting wrong to send email ', 500))
+  // }
+
+  res.send('OK');
+
+};
+
+exports.verifyInvitation = async (req, res, next) => {
+  const token = req.query.token;
+
+  console.log({ token });
+
+  res.send('Verification successful');
 
 };
 
