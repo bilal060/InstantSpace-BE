@@ -182,38 +182,58 @@ exports.managerInvitation = async (req, res, next) => {
     return next(new AppError('Error sending invitation', 500));
   }
 
-  console.log(process.env.SERVER_BASE_URL);
+  const message = `${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}&email=${req.body.email}`;
 
-  const message = `Click the link to create your account ${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}`;
+  const newManager = new User({
+    ...req.body,
+    managerToken: hashedToken
+  })
 
-  console.log({ message });
+  try {
+    await newManager.save({ validateBeforeSave: false });
+  } catch (error) {
+    console.log(error);
+    return (new AppError('Error sending invitation', 500))
+  }
 
-  // try {
-  //   await sendEmail({
-  //     email: req.body.email,
-  //     subject: 'Manager Invitation',
-  //     message
-  //   })
-  //   res.status(200).json({
-  //     status: 'success',
-  //     message: 'OTP send into email'
-  //   });
-  // } catch (err) {
-  //   user.userValidotp = undefined;
-  //   await user.save({ validateBeforeSave: false });
-  //   return (new AppError('somting wrong to send email ', 500))
-  // }
-
-  res.send('OK');
+  try {
+    await sendEmail({
+      email: req.body.email,
+      subject: 'Manager Invitation',
+      message
+    })
+    res.status(200).json({
+      status: 'success',
+      message: 'Invitation sent to manager'
+    });
+  } catch (err) {
+    user.userValidotp = undefined;
+    await user.save({ validateBeforeSave: false });
+    return (new AppError('somting wrong to send email ', 500))
+  }
 
 };
 
 exports.verifyInvitation = async (req, res, next) => {
-  const token = req.query.token;
+  const { token, email } = req.query;
 
-  console.log({ token });
+  let existingManager;
+  try {
+    existingManager = await User.findOne({ email });
+  } catch (error) {
+    console.log(error);
+    return (new AppError('Error fetching manager', 500))
+  }
 
-  res.send('Verification successful');
+  if (!existingManager) {
+    return (new AppError('No manager found', 404))
+  }
+
+  if (existingManager.managerToken !== token) {
+    return res.send("ERROR");
+  }
+
+  res.redirect(`${process.env.FRONTEND_URL}/auth/manager/register?email=${existingManager.email}`);
 
 };
 
