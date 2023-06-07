@@ -50,10 +50,12 @@ it checks the user's role and updates the user's profile accordingly. If the use
 recognized, it returns an error. Finally, it updates the user's profile in the database and returns
 a success message with the updated user object. */
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
-  console.log(req.body);
 
   const options = { validateBeforeSave: false };
-  const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+  const user = await User.findByIdAndUpdate(req.user.id, {
+    ...req.body,
+    photo: req.file.path
+  }, {
     new: true
   }).setOptions(options);
 
