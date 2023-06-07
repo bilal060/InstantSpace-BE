@@ -77,7 +77,7 @@ exports.signup = catchAsync(async (req, res) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Your Verify Account otp (valid for 10 mint)',
+      subject: 'Your Verify Account otp (valid for 10 mint)', 
       message
     })
     res.status(200).json({

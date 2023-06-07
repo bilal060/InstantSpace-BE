@@ -11,7 +11,7 @@ async function getCoordsOfAddress(address) {
     const data = response.data;
 
     if (!data || data.status === 'ZERO_RESULTS') {
-        throw new AppError('Could not find location coordinates', 404);
+        throw new AppErroqqr('Could not find location coordinates', 404);
     }
 
     const coordinates = data.results[0].geometry.location;
