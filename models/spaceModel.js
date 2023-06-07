@@ -24,7 +24,7 @@ const spaceSchema = new Schema({
     description: { type: String },
     images: [{ type: String }],
     available: { type: Boolean, default: true },
-    managers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    managers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
     reviews: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         review: { type: String },
