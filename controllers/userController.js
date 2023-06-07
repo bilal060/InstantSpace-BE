@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const sendEmail = require('../utils/email');
 const { validationResult } = require('express-validator');
 const dotenv = require('dotenv');
-const  mongoose = require('mongoose');
+const mongoose = require('mongoose');
 dotenv.config({ path: '../config.env' });
 
 const filterObj = (obj, ...allowedFields) => {
@@ -183,7 +183,7 @@ exports.managerInvitation = async (req, res, next) => {
     return next(new AppError('Error sending invitation', 500));
   }
 
-  const message = `${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}&email=${req.body.email}`;
+  const message = `${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}&email=${req.body.email}&branch=${req.body.branch}`;
 
   const newManager = new User({
     ...req.body,
@@ -216,7 +216,7 @@ exports.managerInvitation = async (req, res, next) => {
 };
 
 exports.verifyInvitation = async (req, res, next) => {
-  const { token, email } = req.query;
+  const { token, email, branch } = req.query;
 
   let existingManager;
   try {
@@ -234,13 +234,9 @@ exports.verifyInvitation = async (req, res, next) => {
     return res.send("ERROR");
   }
 
-  res.redirect(`${process.env.FRONTEND_URL}/auth/manager/register?email=${existingManager.email}`);
+  res.redirect(`${process.env.FRONTEND_URL}/auth/manager/register?email=${existingManager.email}&branch=${branch}`);
 
 };
-
-
-
-
 
 exports.managerRegister = catchAsync(async (req, res, next) => {
   const { email, password, passwordConfirm, spaceId } = req.body;
