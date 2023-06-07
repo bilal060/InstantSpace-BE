@@ -115,7 +115,7 @@ const userBookings = async (req, res, next) => {
 
     let userBookings;
     try {
-        userBookings = await Booking.find({ userId: uid });
+        userBookings = await Booking.find({ userId: uid }).populate('userId').populate('spaceId');
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error fetching records', 500));
