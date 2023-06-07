@@ -153,7 +153,7 @@ exports.managerInvitation = async (req, res, next) => {
   };
 
   if (existingUser) {
-    return next(new AppError('Email already exists', 401));
+    return next(new AppError('Email already registered with another account', 401));
   }
 
   if (!req.body.branch.match(/^[0-9a-fA-F]{24}$/)) {
@@ -266,8 +266,8 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
     return next(new AppError('Manager already exists in branch', 401));
   }
 
-  const hashPassword = await bcrypt.hash(password, 12);
-  findUser.password = hashPassword;
+  findUser.password = password
+  findUser.passwordConfirm = passwordConfirm
 
   findSpace.managers.push(findUser.id);
 
