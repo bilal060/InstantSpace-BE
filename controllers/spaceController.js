@@ -144,7 +144,7 @@ const getAllSpaces = async (req, res, next) => {
     let allSpaces;
     let updated;
     try {
-        allSpaces = await Space.find({}).populate('userId', 'email fullName').populate('categoryId');
+        allSpaces = await Space.find({}).populate('userId').populate('categoryId');
         updated = allSpaces.filter((key) => {
             key.categoryId.subcategories.filter((subkey) => {
                 if (subkey._id.toString() == key.subCategoryId.toString()) {
@@ -195,7 +195,7 @@ const getSingleSpace = async (req, res, next) => {
 
     let singleSpace;
     try {
-        singleSpace = await Space.findById(sid);
+        singleSpace = await Space.findById(sid).populate('userId').populate('categoryId');
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error finding space', 500));
@@ -204,6 +204,12 @@ const getSingleSpace = async (req, res, next) => {
     if (!singleSpace) {
         return next(new AppError('No space found against id', 404));
     }
+
+    singleSpace.categoryId.subcategories.filter((subkey) => {
+        if (subkey._id.toString() == singleSpace.subCategoryId.toString()) {
+            return singleSpace.categoryId.subcategories = subkey;
+        }
+    });
 
     res.json({ space: singleSpace });
 };
