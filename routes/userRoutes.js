@@ -22,7 +22,12 @@ router.post('/manager-invitation', [
 
 router.get('/verify-manager-invitation', userController.verifyInvitation);
 
-router.patch('/manager_resgister', userController.managerRegister);
+router.patch('/manager_resgister', [
+  check('email').not().isEmpty(),
+  check('password').not().isEmpty(),
+  check('passwordConfirm').not().isEmpty(),
+  check('spaceId').not().isEmpty(),
+], userController.managerRegister);
 
 router.post('/verifyotp',
   [

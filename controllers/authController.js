@@ -4,6 +4,7 @@ const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 const sendEmail = require('../utils/email');
 const { validationResult } = require('express-validator');
+const bcrypt = require('bcrypt')
 const stripe = require('stripe')('sk_test_51N7wBGI06aS9z6rYIDfQ62UPHoTSjVFqHpW36GxstL0nh2QDGT3ugfuuVczNOMDUIj4bZ0QBEkZ5xIoP3ir2Hw8y00KhX7qHE6');
 
 const jwt = require('jsonwebtoken')
@@ -67,17 +68,13 @@ exports.signup = catchAsync(async (req, res) => {
     companyType,
     customerId: srtipe.id
   });
-
-  if (categories) {
-    user.Categories = categories;
-  }
   const ResetOtp = await user.createotp();
   await user.save();
   const message = `Please Vierify your Account with This OTP ${ResetOtp}.`
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Your Verify Account otp (valid for 10 mint)', 
+      subject: 'Your Verify Account otp (valid for 10 mint)',
       message
     })
     res.status(200).json({
@@ -118,9 +115,21 @@ exports.login = catchAsync(async (req, res, next) => {
 
   let user;
   user = await User.findOne({ email }).select('+password +isTrue')
-  if (!user || !await user.correctPassword(password, user.password)) {
-    return next(new AppError('Incorrect email or password! or please try again', 401))
+  if (!user) {
+    return next(new AppError('Email not found', 404))
   }
+
+  let checkPassword;
+  try {
+    checkPassword = await bcrypt.compare(password, user.password);
+  } catch (error) {
+    return next(new AppError('Password error', 500))
+  }
+
+  if (!checkPassword) {
+    return next(new AppError('Incorrect password', 401))
+  }
+
   if (!user.isTrue) {
     return next(new AppError('You are not verified Please verify again!', 401))
   }
