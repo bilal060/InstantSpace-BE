@@ -242,6 +242,7 @@ exports.verifyInvitation = async (req, res, next) => {
 
 exports.managerRegister = catchAsync(async (req, res, next) => {
   const { email, password, passwordConfirm, spaceId } = req.body;
+  let user ;
   const findUser = await User.findOne({ email });
   if (!findUser) {
     return next(new AppError('User not found', 404));
@@ -250,16 +251,13 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
   const hashPassword = await bcrypt.hash(password, 12);
   const session = await mongoose.startSession();
   session.startTransaction();
-
   try {
-    const user = await User.findByIdAndUpdate(
+     user = await User.findByIdAndUpdate(
       findUser.id,
-      { $set: { password: hashPassword, passwordConfirm: undefined } },
+      { $set: { password: hashPassword, passwordConfirm:undefined,} },
       { new: true, session }
     );
-
     const space = await Space.findById(spaceId);
-
     const checkManager = space.managers.some(
       (manager) => manager.toString() === user.id.toString()
     );
@@ -268,13 +266,10 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
       session.endSession();
       return next(new AppError('Manager already exists', 400));
     }
-
     space.managers.push(user.id);
     await space.save({ session });
-
     const ResetOtp = await user.createotp();
     const message = `Please verify your account with this OTP: ${ResetOtp}.`;
-
     await sendEmail({
       email: user.email,
       subject: 'Your Verify Account OTP (valid for 10 minutes)',
@@ -291,10 +286,8 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-
-    User.userValidotp = undefined;
-    await User.save({ validateBeforeSave: false });
-
+    user.userValidotp = undefined;
+    await user.save({ validateBeforeSave: false });
     return next(new AppError('Something went wrong while processing the request', 500));
   }
 });
