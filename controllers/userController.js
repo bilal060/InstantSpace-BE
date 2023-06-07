@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const sendEmail = require('../utils/email');
 const { validationResult } = require('express-validator');
 const dotenv = require('dotenv');
+const  mongoose = require('mongoose');
 dotenv.config({ path: '../config.env' });
 
 const filterObj = (obj, ...allowedFields) => {
@@ -51,7 +52,6 @@ recognized, it returns an error. Finally, it updates the user's profile in the d
 a success message with the updated user object. */
 exports.updateUserProfile = catchAsync(async (req, res, next) => {
   console.log(req.body);
-
   const options = { validateBeforeSave: false };
   const user = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true
@@ -102,7 +102,6 @@ exports.updateUserCompany = catchAsync(async (req, res, next) => {
       companyPhone,
       companyLicenseNo,
       companyAddress,
-      // Categories,
       companyDoc: companyDocpath,
       companyType
     };
@@ -236,6 +235,72 @@ exports.verifyInvitation = async (req, res, next) => {
   res.redirect(`${process.env.FRONTEND_URL}/auth/manager/register?email=${existingManager.email}`);
 
 };
+
+
+
+
+
+exports.managerRegister = catchAsync(async (req, res, next) => {
+  const { email, password, passwordConfirm, spaceId } = req.body;
+  const findUser = await User.findOne({ email });
+  if (!findUser) {
+    return next(new AppError('User not found', 404));
+  }
+
+  const hashPassword = await bcrypt.hash(password, 12);
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      findUser.id,
+      { $set: { password: hashPassword, passwordConfirm: undefined } },
+      { new: true, session }
+    );
+
+    const space = await Space.findById(spaceId);
+
+    const checkManager = space.managers.some(
+      (manager) => manager.toString() === user.id.toString()
+    );
+    if (checkManager) {
+      await session.abortTransaction();
+      session.endSession();
+      return next(new AppError('Manager already exists', 400));
+    }
+
+    space.managers.push(user.id);
+    await space.save({ session });
+
+    const ResetOtp = await user.createotp();
+    const message = `Please verify your account with this OTP: ${ResetOtp}.`;
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Your Verify Account OTP (valid for 10 minutes)',
+      message,
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'OTP sent to email',
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
+    User.userValidotp = undefined;
+    await User.save({ validateBeforeSave: false });
+
+    return next(new AppError('Something went wrong while processing the request', 500));
+  }
+});
+
+
+
 
 exports.deleteUser = factory.deleteOne(User);
 exports.updateUser = factory.updateOne(User);
