@@ -21,6 +21,8 @@ router.post('/manager-invitation', authController.protect, [
 ], userController.managerInvitation);
 
 router.get('/verify-manager-invitation', userController.verifyInvitation);
+router.patch('/manager_resgister/:id', userController.managerRegister);
+
 
 router.post('/verifyotp',
   [
