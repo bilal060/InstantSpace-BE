@@ -22,7 +22,7 @@ const Booking = require('../models/bookingModel');
 const createBooking = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return next(new AppError('Invalid data received', 422));           
+        return next(new AppError('Invalid data received', 422));
     }
 
     const { userId, spaceId } = req.body;
@@ -87,7 +87,7 @@ const getAllBookings = async (req, res, next) => {
     };
     let allBookings;
     try {
-        allBookings = await Booking.paginate({}, options);
+        allBookings = await Booking.find().populate('userId').populate('spaceId');
     } catch (error) {
         console.log({ error });
         return next(new AppError("Error fetching bookings", 500));
