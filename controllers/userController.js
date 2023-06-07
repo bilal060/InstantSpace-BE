@@ -240,54 +240,70 @@ exports.verifyInvitation = async (req, res, next) => {
 
 exports.managerRegister = catchAsync(async (req, res, next) => {
   const { email, password, passwordConfirm, spaceId } = req.body;
-  let user ;
+
   const findUser = await User.findOne({ email });
   if (!findUser) {
     return next(new AppError('User not found', 404));
   }
 
-  const hashPassword = await bcrypt.hash(password, 12);
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let findSpace;
   try {
-     user = await User.findByIdAndUpdate(
-      findUser.id,
-      { $set: { password: hashPassword, passwordConfirm:undefined,} },
-      { new: true, session }
-    );
-    const space = await Space.findById(spaceId);
-    const checkManager = space.managers.some(
-      (manager) => manager.toString() === user.id.toString()
-    );
-    if (checkManager) {
-      await session.abortTransaction();
-      session.endSession();
-      return next(new AppError('Manager already exists', 400));
-    }
-    space.managers.push(user.id);
-    await space.save({ session });
-    const ResetOtp = await user.createotp();
-    const message = `Please verify your account with this OTP: ${ResetOtp}.`;
+    findSpace = await Space.findById(spaceId);
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching branch', 500));
+  }
+
+  if (!findSpace) {
+    return next(new AppError('No branch found', 404));
+  }
+
+  const checkManager = findSpace.managers.some(
+    (manager) => manager.toString() === findUser.id.toString()
+  );
+
+  if (checkManager) {
+    return next(new AppError('Manager already exists in branch', 401));
+  }
+
+  const hashPassword = await bcrypt.hash(password, 12);
+  findUser.password = hashPassword;
+
+  findSpace.managers.push(findUser.id);
+
+  let ResetOtp;
+  try {
+    ResetOtp = await findUser.createotp();
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error creating OTP', 500));
+  }
+
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await findSpace.save({ session: session });
+    await findUser.save({ validateBeforeSave: false, session: session });
+    await session.commitTransaction();
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error updating data', 500));
+  }
+
+  const message = `Please verify your account with this OTP: ${ResetOtp}.`;
+
+  try {
     await sendEmail({
-      email: user.email,
+      email: findUser.email,
       subject: 'Your Verify Account OTP (valid for 10 minutes)',
       message,
     });
-
-    await session.commitTransaction();
-    session.endSession();
-
-    res.status(200).json({
-      status: 'success',
-      message: 'OTP sent to email',
-    });
-  } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-    user.userValidotp = undefined;
-    await user.save({ validateBeforeSave: false });
-    return next(new AppError('Something went wrong while processing the request', 500));
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error sending email', 500));
   }
+
+  res.json({ message: 'Records updated successfully' });
 });
 
 
