@@ -12,7 +12,7 @@ router.post('/google-login', [
   check('token').not().isEmpty()
 ], authController.googleLogin);
 
-router.post('/manager-invitation', authController.protect, [
+router.post('/manager-invitation', [
   check('fullName').not().isEmpty(),
   check('email').not().isEmpty(),
   check('phoneNo').not().isEmpty(),
@@ -21,8 +21,8 @@ router.post('/manager-invitation', authController.protect, [
 ], userController.managerInvitation);
 
 router.get('/verify-manager-invitation', userController.verifyInvitation);
-router.patch('/manager_resgister/:id', userController.managerRegister);
 
+router.patch('/manager_resgister', userController.managerRegister);
 
 router.post('/verifyotp',
   [
