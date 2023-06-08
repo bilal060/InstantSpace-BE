@@ -76,10 +76,6 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
 
 exports.updateUserCompany = catchAsync(async (req, res, next) => {
   const {
-    fullName,
-    phoneNo,
-    dob,
-    bio,
     companyName,
     companyPhone,
     companyLicenseNo,
@@ -92,9 +88,7 @@ exports.updateUserCompany = catchAsync(async (req, res, next) => {
 
   if (role === 'Truck Driver') {
     updatedFields = {
-      truckType,
-      drivingLicense,
-      driverAddress,
+      ...req.body,
       licensePhoto: req.file?.path
     };
   }
