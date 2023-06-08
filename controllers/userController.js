@@ -9,6 +9,7 @@ const { validationResult } = require('express-validator');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 dotenv.config({ path: '../config.env' });
+const stripe = require('stripe')('sk_test_51N7wBGI06aS9z6rYIDfQ62UPHoTSjVFqHpW36GxstL0nh2QDGT3ugfuuVczNOMDUIj4bZ0QBEkZ5xIoP3ir2Hw8y00KhX7qHE6');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -239,6 +240,11 @@ exports.verifyInvitation = async (req, res, next) => {
 };
 
 exports.managerRegister = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new AppError('Invalid data received', 422));
+  }
+
   const { email, password, passwordConfirm, spaceId } = req.body;
 
   const findUser = await User.findOne({ email });
@@ -266,8 +272,13 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
     return next(new AppError('Manager already exists in branch', 401));
   }
 
+  const customer = await stripe.customers.create({
+    description: `${email} customer Id`,
+  });
+
   findUser.password = password
   findUser.passwordConfirm = passwordConfirm
+  findUser.customerId = customer.id
 
   findSpace.managers.push(findUser.id);
 
@@ -306,7 +317,87 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
   res.json({ message: 'Records updated successfully' });
 });
 
+exports.addUserCard = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new AppError('Invalid data received', 422));
+  }
 
+  let existingUser;
+  try {
+    existingUser = await User.findById(req.body.userId);
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching user', 500));
+  };
+
+  if (!existingUser) {
+    return next(new AppError('No user found', 404));
+  }
+
+  let token;
+  try {
+    token = await stripe.tokens.create({
+      card: {
+        number: req.body.cardNo,
+        exp_month: req.body.expMonth,
+        exp_year: req.body.expYear,
+        cvc: req.body.cvc,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error creating token', 500));
+  };
+
+  let card;
+  try {
+    card = await stripe.customers.createSource(
+      existingUser.customerId,
+      {
+        source: token.id
+      }
+    );
+  } catch (error) {
+    console.log(error.message);
+    return next(new AppError(error.message, 500));
+  };
+
+  res.status(201).json({ message: 'User card saved successfully' });
+});
+
+exports.getUserCards = catchAsync(async (req, res, next) => {
+  const userId = req.params.userId;
+
+  if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new AppError('Invalid user id format', 500));
+  }
+
+  let existingUser;
+  try {
+    existingUser = await User.findById(userId);
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching user', 500));
+  };
+
+  if (!existingUser) {
+    return next(new AppError('No user found', 404));
+  }
+
+  let cards;
+  try {
+    cards = await stripe.customers.listSources(
+      existingUser.customerId,
+      { object: 'card' }
+    );
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching cards', 500));
+  };
+
+  res.json({ cards });
+});
 
 
 exports.deleteUser = factory.deleteOne(User);

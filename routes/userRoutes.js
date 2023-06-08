@@ -43,15 +43,20 @@ router.post(
   '/add_card',
   authController.protect,
   [
-    check('userId')
-      .not()
-      .isEmpty(),
-    check('payment_method')
-      .not()
-      .isEmpty()
+    check('userId').not().isEmpty(),
+    check('cardNo').not().isEmpty(),
+    check('expMonth').isNumeric().not().isEmpty(),
+    check('expYear').isNumeric().not().isEmpty(),
+    check('cvc').not().isEmpty(),
+    check('name').not().isEmpty(),
   ],
-  authController.addUserCard
+  userController.addUserCard
 );
+
+router.get('/user-cards/:userId',
+  authController.protect,
+  userController.getUserCards
+)
 router.patch(
   '/UpdateUserProfile',
   authController.protect,
@@ -129,11 +134,6 @@ router.patch(
 );
 router.patch('/updateMe', authController.protect, userController.updateMe);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
-router.delete(
-  '/delete_card/:uid/:cid',
-  authController.protect,
-  authController.deleteUserCard
-);
 router
   .route('/')
   .get(userController.getAllUsers)

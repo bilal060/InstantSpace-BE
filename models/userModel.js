@@ -79,7 +79,6 @@ const userSchema = new mongoose.Schema({
   drivingLicense: { type: String },
   driverAddress: { type: String },
   licensePhoto: { type: String },
-  cards: [{ type: String }],
   passwordChangedAt: Date,
   otp: String,
   managerToken: String,
