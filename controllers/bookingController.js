@@ -64,11 +64,11 @@ const createBooking = async (req, res, next) => {
 
     try {
         charge = await stripe.charges.create({
-            amount: (req.body.price * calculatedHours) * 100,
+            amount: (+req.body.price * calculatedHours) * 100,
             currency: 'usd',
             source: req.body.card,
             customer: userDetails.customerId,
-            description: 'Space reservation',
+            description: `${userDetails.email} space reservation`,
         });
     } catch (error) {
         console.log({ error });
@@ -78,7 +78,10 @@ const createBooking = async (req, res, next) => {
     const newBooking = new Booking({
         ...req.body,
         price: req.body.price * calculatedHours,
-        paymentId: charge.id
+        paymentId: charge.id,
+        payment: true,
+        from: new Date(req.body.from),
+        to: new Date(req.body.to)
     });
 
     try {
