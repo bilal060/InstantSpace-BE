@@ -9,7 +9,6 @@ const stripe = require('stripe')('sk_test_51N7wBGI06aS9z6rYIDfQ62UPHoTSjVFqHpW36
 
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv');
-const { log } = require('console');
 dotenv.config({ path: './config.env' });
 
 const { OAuth2Client } = require('google-auth-library');
