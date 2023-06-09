@@ -142,26 +142,46 @@ const updateSpace = async (req, res, next) => {
  */
 const getAllSpaces = async (req, res, next) => {
     let allSpaces;
-    let updated;
+    let updated = [];
+
     try {
-        allSpaces = await Space.find({}).populate('managers').populate('userId').populate('categoryId');
-        updated = allSpaces.filter((key) => {
-            key.categoryId.subcategories.filter((subkey) => {
-                if (subkey._id.toString() == key.subCategoryId.toString()) {
-                    return key.categoryId.subcategories = subkey;
-                }
+        if (req.query.filterby) {
+            const filterBySubcategoryId = req.query.filterby;
+            updated = await Space.find({ subCategoryId: filterBySubcategoryId })
+                .populate('managers')
+                .populate('userId')
+                .populate('categoryId');
+        } else {
+            allSpaces = await Space.find({})
+                .populate('managers')
+                .populate('userId')
+                .populate('categoryId');
+
+            updated = allSpaces.filter((key) => {
+                key.categoryId.subcategories.filter((subkey) => {
+                    if (subkey._id.toString() == key.subCategoryId.toString()) {
+                        return key.categoryId.subcategories = subkey;
+                    }
+                });
+
+                return key;
             });
+        }
 
-            return key;
-        })
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const paginatedSpaces = updated.slice(startIndex, endIndex);
+        const totalRecords = updated.length;
 
+        res.json({ spaces: paginatedSpaces, page, totalRecords ,limit});
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error fetching spaces', 500));
-    };
-
-    res.json({ spaces: updated });
+    }
 };
+
 
 const getSpacesBySubcatId = async (req, res, next) => {
     const subcatId = req.params.subcatId;
@@ -259,25 +279,37 @@ const getUserSpaces = async (req, res, next) => {
     if (!userDetails) {
         return next(new AppError('No user found against id', 404));
     }
-
-    let allSpaces;
     try {
-        allSpaces = await Space.find({ userId: uid }).populate('managers').populate('userId').populate('categoryId');
-        updated = allSpaces.filter((key) => {
-            key.categoryId.subcategories.filter((subkey) => {
-                if (subkey._id.toString() == key.subCategoryId.toString()) {
-                    return key.categoryId.subcategories = subkey;
-                }
-            });
-
-            return key;
-        })
-    } catch (error) {
-        console.log({ error });
-        return next(new AppError('Error finding spaces', 500));
-    };
-
-    res.json({ spaces: updated });
+    if (req.query.filterby) {
+        const filterBySubcategoryId = req.query.filterby;
+        updated = await Space.find({ subCategoryId: filterBySubcategoryId })
+            .populate('managers')
+            .populate('userId')
+            .populate('categoryId');
+    } else{
+        let allSpaces;
+            allSpaces = await Space.find({ userId: uid }).populate('managers').populate('userId').populate('categoryId');
+            updated = allSpaces.filter((key) => {
+                key.categoryId.subcategories.filter((subkey) => {
+                    if (subkey._id.toString() == key.subCategoryId.toString()) {
+                        return key.categoryId.subcategories = subkey;
+                    }
+                });
+    
+                return key;
+            })
+    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedSpaces = updated.slice(startIndex, endIndex);
+    const totalRecords = updated.length;
+    res.json({ spaces: paginatedSpaces, page, totalRecords ,limit});
+}catch (error) {
+    console.log({ error });
+    return next(new AppError('Error finding spaces', 500));
+};
 };
 
 /**
