@@ -60,6 +60,10 @@ const createBooking = async (req, res, next) => {
     let calculatedHours = (endTime - startTime) / 1000;
     calculatedHours /= (60 * 60);
 
+    if (calculatedHours < 0) {
+        return next(new AppError('From slot cannot be greater than To slot', 403));
+    }
+
     let charge;
 
     try {
