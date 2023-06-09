@@ -14,10 +14,12 @@ const bookingSchema = new Schema(
       ref: 'Space',
       required: true
     },
-    from: { type: String, required: true },
-    to: { type: String, required: true },
+    details: { type: Object, required: true },
+    from: { type: Date, required: true },
+    to: { type: Date, required: true },
     price: { type: Number, required: true },
-    payment: { type: Boolean, default: false }
+    payment: { type: Boolean, default: false },
+    paymentId: { type: String, required: true },
   },
   { timestamps: true }
 );

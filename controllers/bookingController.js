@@ -4,6 +4,8 @@ const AppError = require('../utils/appError');
 const Space = require('../models/spaceModel');
 const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
+const stripe = require('stripe')('sk_test_51N7wBGI06aS9z6rYIDfQ62UPHoTSjVFqHpW36GxstL0nh2QDGT3ugfuuVczNOMDUIj4bZ0QBEkZ5xIoP3ir2Hw8y00KhX7qHE6');
+
 
 /**
  * This function creates a new booking by validating user and space details, updating space
@@ -22,6 +24,7 @@ const Booking = require('../models/bookingModel');
 const createBooking = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.log(errors);
         return next(new AppError('Invalid data received', 422));
     }
 
@@ -51,9 +54,32 @@ const createBooking = async (req, res, next) => {
         return next(new AppError('No space found against id', 404));
     }
 
-    spaceDetails.available = false;
+    const startTime = new Date(req.body.from).getTime();
+    const endTime = new Date(req.body.to).getTime();
 
-    const newBooking = new Booking(req.body);
+    let calculatedHours = (endTime - startTime) / 1000;
+    calculatedHours /= (60 * 60);
+
+    let charge;
+
+    try {
+        charge = await stripe.charges.create({
+            amount: (req.body.price * calculatedHours) * 100,
+            currency: 'usd',
+            source: req.body.card,
+            customer: userDetails.customerId,
+            description: 'Space reservation',
+        });
+    } catch (error) {
+        console.log({ error });
+        return next(new AppError(error.message, 500));
+    }
+
+    const newBooking = new Booking({
+        ...req.body,
+        price: req.body.price * calculatedHours,
+        paymentId: charge.id
+    });
 
     try {
         await newBooking.save();
