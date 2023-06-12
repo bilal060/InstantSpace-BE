@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema({
     enum: ['Customer', 'Storage Owner', 'Service Provider', 'Admin', 'Truck Driver', 'Manager'],
     default: 'Customer'
   },
+  managerOwner: mongoose.Schema.Types.ObjectId,
   password: {
     type: String,
     required: [true, 'Please provide a password'],

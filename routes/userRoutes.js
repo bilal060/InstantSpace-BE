@@ -14,6 +14,7 @@ router.post('/google-login', [
 
 router.post('/manager-invitation', [
   check('fullName').not().isEmpty(),
+  check('managerOwner').not().isEmpty(),
   check('email').not().isEmpty(),
   check('phoneNo').not().isEmpty(),
   check('branch').isString().not().isEmpty(),
@@ -21,6 +22,8 @@ router.post('/manager-invitation', [
 ], userController.managerInvitation);
 
 router.get('/verify-manager-invitation', userController.verifyInvitation);
+
+router.get('/owner-managers/:ownerId', authController.protect, userController.getOwnerManagers);
 
 router.patch('/manager_resgister', [
   check('email').not().isEmpty(),

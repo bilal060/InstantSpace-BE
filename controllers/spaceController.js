@@ -302,6 +302,7 @@ const getUserSpaces = async (req, res, next) => {
     }
 
     if (req.query.filterby) {
+        console.log(req.query.filterby);
         try {
             totalRecords = await Space.find({ subCategoryId: req.query.filterby, userId: userDetails.id }).count();
             allSpaces = await Space.find({ subCategoryId: req.query.filterby, userId: userDetails.id })

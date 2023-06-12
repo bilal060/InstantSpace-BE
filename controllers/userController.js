@@ -27,7 +27,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       )
     );
   }
-  const filteredBody = filterObj(req.body, 'name', 'email');
+  const filteredBody = filterObj(req.body);
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true
@@ -391,6 +391,30 @@ exports.getUserCards = catchAsync(async (req, res, next) => {
   };
 
   res.json({ cards });
+});
+
+exports.getOwnerManagers = catchAsync(async (req, res, next) => {
+  const ownerId = req.params.ownerId;
+
+  let ownerManagers;
+  let totalRecords;
+  let totalPages;
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    totalRecords = await User.find({ role: 'Manager', managerOwner: ownerId }).count();
+    ownerManagers = await User.find({ role: 'Manager', managerOwner: ownerId }).skip(skip).limit(limit);
+  } catch (error) {
+    console.log(error);
+    return next(new AppError('Error fetching managers', 500));
+  }
+
+  totalPages = Math.ceil(totalRecords / limit);
+
+  res.json({ managers: ownerManagers, page, totalRecords, totalPages, limit });
 });
 
 
