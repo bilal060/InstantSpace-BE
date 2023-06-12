@@ -114,19 +114,26 @@ const createBooking = async (req, res, next) => {
  * The JSON object has a key "bookings" which holds an array of all the bookings.
  */
 const getAllBookings = async (req, res, next) => {
-    const options = {
-        page: parseInt('1', 10),
-        limit: parseInt('2', 10)
-    };
+
     let allBookings;
+    let totalRecords;
+    let totalPages;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
     try {
-        allBookings = await Booking.find().populate('userId').populate('spaceId');
+        totalRecords = await Booking.find().count();
+        allBookings = await Booking.find().populate('userId').populate('spaceId').skip(skip).limit(limit);
     } catch (error) {
         console.log({ error });
         return next(new AppError("Error fetching bookings", 500));
     };
 
-    res.json({ bookings: allBookings });
+    totalPages = Math.ceil(totalRecords / limit);
+
+    res.json({ spaces: allBookings, page, totalRecords, totalPages, limit });
 };
 
 /**
@@ -146,15 +153,25 @@ const getAllBookings = async (req, res, next) => {
 const userBookings = async (req, res, next) => {
     const uid = req.params.uid;
 
-    let userBookings;
+    let allBookings;
+    let totalRecords;
+    let totalPages;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
     try {
-        userBookings = await Booking.find({ userId: uid }).populate('userId').populate('spaceId');
+        totalRecords = await Booking.find({ userId: uid }).count();
+        allBookings = await Booking.find({ userId: uid }).populate('userId').populate('spaceId').skip(skip).limit(limit);
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error fetching records', 500));
     };
 
-    res.json({ userBookings });
+    totalPages = Math.ceil(totalRecords / limit);
+
+    res.json({ spaces: allBookings, page, totalRecords, totalPages, limit });
 };
 
 

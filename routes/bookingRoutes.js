@@ -12,7 +12,7 @@ router.get('/user_bookings/:uid', authController.protect, bookingController.user
 
 router.get('/booking_details/:sid', authController.protect, bookingController.bookingDetails);
 
-router.post('/create_booking', [
+router.post('/create_booking', authController.protect, [
     check('userId').not().isEmpty(),
     check('spaceId').not().isEmpty(),
     check('card').not().isEmpty(),

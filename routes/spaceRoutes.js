@@ -13,7 +13,7 @@ router.get('/cat-spaces/:subcatId', authController.protect, spaceController.getS
 
 router.get('/single_space/:sid', authController.protect, spaceController.getSingleSpace);
 
-router.get('/space/:uid', authController.protect, spaceController.getUserSpaces);
+router.get('/space/:uid', spaceController.getUserSpaces);
 
 router.post('/add_space', authController.protect, spaceUpload.any('space_imgs'), [
     check('userId').not().isEmpty(),
