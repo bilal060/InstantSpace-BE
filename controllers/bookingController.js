@@ -171,7 +171,7 @@ const userBookings = async (req, res, next) => {
 
     totalPages = Math.ceil(totalRecords / limit);
 
-    res.json({ spaces: allBookings, page, totalRecords, totalPages, limit });
+    res.json({ bookings: allBookings, page, totalRecords, totalPages, limit });
 };
 
 
