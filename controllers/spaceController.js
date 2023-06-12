@@ -143,43 +143,56 @@ const updateSpace = async (req, res, next) => {
 const getAllSpaces = async (req, res, next) => {
     let allSpaces;
     let updated = [];
+    let totalRecords;
+    let totalPages;
 
-    try {
-        if (req.query.filterby) {
-            const filterBySubcategoryId = req.query.filterby;
-            updated = await Space.find({ subCategoryId: filterBySubcategoryId })
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    if (req.query.filterby) {
+        try {
+            totalRecords = await Space.find({ subCategoryId: req.query.filterby }).count();
+            allSpaces = await Space.find({ subCategoryId: req.query.filterby })
                 .populate('managers')
                 .populate('userId')
-                .populate('categoryId');
-        } else {
+                .populate('categoryId')
+                .skip(skip)
+                .limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching spaces', 500));
+        }
+
+    }
+    else {
+        try {
+            totalRecords = await Space.find({}).count();
             allSpaces = await Space.find({})
                 .populate('managers')
                 .populate('userId')
-                .populate('categoryId');
-
-            updated = allSpaces.filter((key) => {
-                key.categoryId.subcategories.filter((subkey) => {
-                    if (subkey._id.toString() == key.subCategoryId.toString()) {
-                        return key.categoryId.subcategories = subkey;
-                    }
-                });
-
-                return key;
-            });
+                .populate('categoryId')
+                .skip(skip)
+                .limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching spaces', 500));
         }
-
-        const page = parseInt(req.query.page) || 1;
-        const limit = 10;
-        const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
-        const paginatedSpaces = updated.slice(startIndex, endIndex);
-        const totalRecords = updated.length;
-
-        res.json({ spaces: paginatedSpaces, page, totalRecords ,limit});
-    } catch (error) {
-        console.log({ error });
-        return next(new AppError('Error fetching spaces', 500));
     }
+
+    totalPages = Math.ceil(totalRecords / limit);
+
+    updated = allSpaces.filter((key) => {
+        key.categoryId.subcategories.filter((subkey) => {
+            if (subkey._id.toString() == key.subCategoryId.toString()) {
+                return key.categoryId.subcategories = subkey;
+            }
+        });
+
+        return key;
+    });
+
+    res.json({ spaces: updated, page, totalRecords, totalPages, limit });
 };
 
 
@@ -267,8 +280,16 @@ const deleteSpace = async (req, res, next) => {
 const getUserSpaces = async (req, res, next) => {
     const uid = req.params.uid;
 
+    let allSpaces;
+    let updated = [];
+    let totalRecords;
+    let totalPages;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
     let userDetails;
-    let updated;
     try {
         userDetails = await User.findById(uid);
     } catch (error) {
@@ -279,37 +300,51 @@ const getUserSpaces = async (req, res, next) => {
     if (!userDetails) {
         return next(new AppError('No user found against id', 404));
     }
-    try {
+
     if (req.query.filterby) {
-        const filterBySubcategoryId = req.query.filterby;
-        updated = await Space.find({ subCategoryId: filterBySubcategoryId })
-            .populate('managers')
-            .populate('userId')
-            .populate('categoryId');
-    } else{
-        let allSpaces;
-            allSpaces = await Space.find({ userId: uid }).populate('managers').populate('userId').populate('categoryId');
-            updated = allSpaces.filter((key) => {
-                key.categoryId.subcategories.filter((subkey) => {
-                    if (subkey._id.toString() == key.subCategoryId.toString()) {
-                        return key.categoryId.subcategories = subkey;
-                    }
-                });
-    
-                return key;
-            })
+        try {
+            totalRecords = await Space.find({ subCategoryId: req.query.filterby, userId: userDetails.id }).count();
+            allSpaces = await Space.find({ subCategoryId: req.query.filterby, userId: userDetails.id })
+                .populate('managers')
+                .populate('userId')
+                .populate('categoryId')
+                .skip(skip)
+                .limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching spaces', 500));
+        }
     }
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const paginatedSpaces = updated.slice(startIndex, endIndex);
-    const totalRecords = updated.length;
-    res.json({ spaces: paginatedSpaces, page, totalRecords ,limit});
-}catch (error) {
-    console.log({ error });
-    return next(new AppError('Error finding spaces', 500));
-};
+    else {
+        try {
+            totalRecords = await Space.find({ userId: userDetails.id }).count();
+            allSpaces = await Space.find({ userId: userDetails.id })
+                .populate('managers')
+                .populate('userId')
+                .populate('categoryId')
+                .skip(skip)
+                .limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching spaces', 500));
+        }
+    }
+
+    totalPages = Math.ceil(totalRecords / limit);
+
+    updated = allSpaces.filter((key) => {
+        key.categoryId.subcategories.filter((subkey) => {
+            if (subkey._id.toString() == key.subCategoryId.toString()) {
+                return key.categoryId.subcategories = subkey;
+            }
+        });
+
+        return key;
+    });
+
+    res.json({ spaces: updated, page, totalRecords, totalPages, limit });
+
+
 };
 
 /**

@@ -89,14 +89,24 @@ const updateVehicle = async (req, res, next) => {
 
 const getAllVehicles = async (req, res, next) => {
   let allVehicles;
+  let totalRecords;
+  let totalPages;
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
   try {
-    allVehicles = await Vehicle.find({});
+    totalRecords = await Vehicle.find({}).count();
+    allVehicles = await Vehicle.find({}).skip(skip).limit(limit);
   } catch (error) {
     console.log({ error });
     return next(new AppError('Error fetching Vehicles', 500));
   }
 
-  res.json({ Vehicles: allVehicles });
+  totalPages = Math.ceil(totalRecords / limit);
+
+  res.json({ vehicles: allVehicles, page, totalRecords, totalPages, limit });
 };
 
 
@@ -138,6 +148,14 @@ const deleteVehicle = async (req, res, next) => {
 const getUserVehicles = async (req, res, next) => {
   const uid = req.params.uid;
 
+  let allVehicles;
+  let totalRecords;
+  let totalPages;
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
   let userDetails;
   try {
     userDetails = await User.findById(uid);
@@ -150,15 +168,17 @@ const getUserVehicles = async (req, res, next) => {
     return next(new AppError('No user found against id', 404));
   }
 
-  let allVehicles;
   try {
-    allVehicles = await Vehicle.find({ userId: uid });
+    totalRecords = await Vehicle.find({ userId: uid }).count();
+    allVehicles = await Vehicle.find({ userId: uid }).skip(skip).limit(limit);
   } catch (error) {
     console.log({ error });
     return next(new AppError('Error finding Vehicles', 500));
   }
 
-  res.json({ Vehicles: allVehicles });
+  totalPages = Math.ceil(totalRecords / limit);
+
+  res.json({ vehicles: allVehicles, page, totalRecords, totalPages, limit });
 };
 
 
