@@ -42,14 +42,14 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, 'Please provide a valid email']
   },
   photo: String,
-  branch: { type: mongoose.Schema.Types.ObjectId },
+  branch: { type: mongoose.Schema.Types.ObjectId, ref: 'Space' },
   slot: Object,
   role: {
     type: String,
     enum: ['Customer', 'Storage Owner', 'Service Provider', 'Admin', 'Truck Driver', 'Manager'],
     default: 'Customer'
   },
-  managerOwner: { type: mongoose.Schema.Types.ObjectId },
+  managerOwner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   password: {
     type: String,
     required: [true, 'Please provide a password'],
