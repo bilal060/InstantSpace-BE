@@ -148,6 +148,8 @@ const deleteVehicle = async (req, res, next) => {
 const getUserVehicles = async (req, res, next) => {
   const uid = req.params.uid;
 
+  console.log(uid);
+
   let allVehicles;
   let totalRecords;
   let totalPages;
