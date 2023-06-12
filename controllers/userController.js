@@ -406,11 +406,19 @@ exports.getOwnerManagers = catchAsync(async (req, res, next) => {
 
   try {
     totalRecords = await User.find({ role: 'Manager', managerOwner: ownerId }).count();
-    ownerManagers = await User.find({ role: 'Manager', managerOwner: ownerId }).populate('branch').skip(skip).limit(limit);
+    ownerManagers = await User.find({ role: 'Manager', managerOwner: ownerId }).select('+isTrue').populate('branch').skip(skip).limit(limit);
   } catch (error) {
     console.log(error);
     return next(new AppError('Error fetching managers', 500));
   }
+
+  // if (ownerManagers.length > 0) {
+  //   ownerManagers.categoryId.subcategories.filter((subkey) => {
+  //     if (subkey._id.toString() == singleSpace.subCategoryId.toString()) {
+  //       return singleSpace.categoryId.subcategories = subkey;
+  //     }
+  //   });
+  // }
 
   totalPages = Math.ceil(totalRecords / limit);
 
