@@ -81,6 +81,7 @@ const createBooking = async (req, res, next) => {
 
     const newBooking = new Booking({
         ...req.body,
+        ownerId: spaceDetails.userId,
         price: req.body.price * calculatedHours,
         paymentId: charge.id,
         payment: true,
@@ -208,7 +209,59 @@ const bookingDetails = async (req, res, next) => {
     res.json({ bookingDetails });
 };
 
+const ownerBookings = async (req, res, next) => {
+    const ownerId = req.params.ownerId;
+
+    let allBookings;
+    let totalRecords;
+    let totalPages;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    try {
+        totalRecords = await Booking.find({ ownerId }).countDocuments();
+        allBookings = await Booking.find({ ownerId }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching records', 500));
+    }
+
+    totalPages = Math.ceil(totalRecords / limit);
+
+    res.json({ bookings: allBookings, page, totalRecords, totalPages, limit });
+
+};
+
+const spaceBookings = async (req, res, next) => {
+    const spaceId = req.params.spaceId;
+
+    let allBookings;
+    let totalRecords;
+    let totalPages;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    try {
+        totalRecords = await Booking.find({ spaceId }).countDocuments();
+        allBookings = await Booking.find({ spaceId }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching records', 500));
+    }
+
+    totalPages = Math.ceil(totalRecords / limit);
+
+    res.json({ bookings: allBookings, page, totalRecords, totalPages, limit });
+
+};
+
 exports.createBooking = createBooking;
 exports.getAllBookings = getAllBookings;
 exports.userBookings = userBookings;
 exports.bookingDetails = bookingDetails;
+exports.ownerBookings = ownerBookings;
+exports.spaceBookings = spaceBookings;

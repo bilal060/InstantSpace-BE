@@ -10,6 +10,10 @@ router.get('/', authController.protect, bookingController.getAllBookings);
 
 router.get('/user_bookings/:uid', authController.protect, bookingController.userBookings);
 
+router.get('/owner_bookings/:ownerId', authController.protect, bookingController.ownerBookings);
+
+router.get('/space_bookings/:spaceId', bookingController.spaceBookings);
+
 router.get('/booking_details/:sid', authController.protect, bookingController.bookingDetails);
 
 router.post('/create_booking', authController.protect, [
