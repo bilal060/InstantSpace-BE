@@ -24,6 +24,7 @@ const bookingSchema = new Schema(
       ref: 'Category',
       required: true
     },
+    managers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     details: { type: Object, required: true },
     from: { type: Date, required: true },
     to: { type: Date, required: true },

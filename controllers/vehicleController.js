@@ -148,8 +148,6 @@ const deleteVehicle = async (req, res, next) => {
 const getUserVehicles = async (req, res, next) => {
   const uid = req.params.uid;
 
-  console.log(uid);
-
   let allVehicles;
   let totalRecords;
   let totalPages;
@@ -171,7 +169,7 @@ const getUserVehicles = async (req, res, next) => {
   }
 
   try {
-    totalRecords = await Vehicle.find({ userId: uid }).count();
+    totalRecords = await Vehicle.find({ userId: uid }).countDocuments();
     allVehicles = await Vehicle.find({ userId: uid }).skip(skip).limit(limit);
   } catch (error) {
     console.log({ error });

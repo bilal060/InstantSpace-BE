@@ -12,7 +12,9 @@ router.get('/user_bookings/:uid', authController.protect, bookingController.user
 
 router.get('/owner_bookings/:ownerId', authController.protect, bookingController.ownerBookings);
 
-router.get('/space_bookings/:spaceId', bookingController.spaceBookings);
+router.get('/manager_bookings/:managerId', authController.protect, bookingController.managerBookings);
+
+router.get('/space_bookings/:spaceId', authController.protect, bookingController.spaceBookings);
 
 router.get('/booking_details/:sid', authController.protect, bookingController.bookingDetails);
 

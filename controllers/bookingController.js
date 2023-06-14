@@ -76,7 +76,7 @@ const createBooking = async (req, res, next) => {
         });
     } catch (error) {
         console.log({ error });
-        return next(new AppError(error.message, 500));
+        return next(new AppError(`Stripe ${error.message}`, 500));
     }
 
     const newBooking = new Booking({
@@ -86,7 +86,8 @@ const createBooking = async (req, res, next) => {
         paymentId: charge.id,
         payment: true,
         from: new Date(req.body.from),
-        to: new Date(req.body.to)
+        to: new Date(req.body.to),
+        managers: spaceDetails.managers
     });
 
     try {
@@ -256,6 +257,42 @@ const ownerBookings = async (req, res, next) => {
 
 };
 
+const managerBookings = async (req, res, next) => {
+    const managerId = req.params.managerId;
+
+    let allBookings;
+    let totalRecords;
+    let totalPages;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    if (req.query.filterBy) {
+        try {
+            totalRecords = await Booking.find({ managers: { $in: [managerId] }, subcategoryId: req.query.filterBy }).countDocuments();
+            allBookings = await Booking.find({ managers: { $in: [managerId] }, subcategoryId: req.query.filterBy }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching records', 500));
+        }
+    }
+    else {
+        try {
+            totalRecords = await Booking.find({ managers: { $in: [managerId] } }).countDocuments();
+            allBookings = await Booking.find({ managers: { $in: [managerId] } }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching records', 500));
+        }
+    }
+
+    totalPages = Math.ceil(totalRecords / limit);
+
+    res.json({ bookings: allBookings, page, totalRecords, totalPages, limit });
+
+};
+
 const spaceBookings = async (req, res, next) => {
     const spaceId = req.params.spaceId;
 
@@ -287,3 +324,4 @@ exports.userBookings = userBookings;
 exports.bookingDetails = bookingDetails;
 exports.ownerBookings = ownerBookings;
 exports.spaceBookings = spaceBookings;
+exports.managerBookings = managerBookings;
