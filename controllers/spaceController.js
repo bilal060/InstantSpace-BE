@@ -228,7 +228,7 @@ const getSingleSpace = async (req, res, next) => {
 
     let singleSpace;
     try {
-        singleSpace = await Space.findById(sid).populate('userId').populate('categoryId');
+        singleSpace = await Space.findById(sid).populate('managers').populate('userId').populate('categoryId');
     } catch (error) {
         console.log({ error });
         return next(new AppError('Error finding space', 500));

@@ -273,6 +273,7 @@ exports.managerRegister = catchAsync(async (req, res, next) => {
   findUser.password = password
   findUser.passwordConfirm = passwordConfirm
   findUser.customerId = customer.id
+  findUser.subcategoryId = findSpace.subCategoryId
 
   findSpace.managers.push(findUser.id);
 
@@ -404,21 +405,24 @@ exports.getOwnerManagers = catchAsync(async (req, res, next) => {
   const limit = 10;
   const skip = (page - 1) * limit;
 
-  try {
-    totalRecords = await User.find({ role: 'Manager', managerOwner: ownerId }).count();
-    ownerManagers = await User.find({ role: 'Manager', managerOwner: ownerId }).select('+isTrue').populate('branch').skip(skip).limit(limit);
-  } catch (error) {
-    console.log(error);
-    return next(new AppError('Error fetching managers', 500));
+  if (req.query.filterBy) {
+    try {
+      totalRecords = await User.find({ role: 'Manager', managerOwner: ownerId, subcategoryId: req.query.filterBy }).count();
+      ownerManagers = await User.find({ role: 'Manager', managerOwner: ownerId, subcategoryId: req.query.filterBy }).select('+isTrue').populate('branch').skip(skip).limit(limit);
+    } catch (error) {
+      console.log(error);
+      return next(new AppError('Error fetching managers', 500));
+    }
   }
-
-  // if (ownerManagers.length > 0) {
-  //   ownerManagers.categoryId.subcategories.filter((subkey) => {
-  //     if (subkey._id.toString() == singleSpace.subCategoryId.toString()) {
-  //       return singleSpace.categoryId.subcategories = subkey;
-  //     }
-  //   });
-  // }
+  else {
+    try {
+      totalRecords = await User.find({ role: 'Manager', managerOwner: ownerId }).count();
+      ownerManagers = await User.find({ role: 'Manager', managerOwner: ownerId }).select('+isTrue').populate('branch').skip(skip).limit(limit);
+    } catch (error) {
+      console.log(error);
+      return next(new AppError('Error fetching managers', 500));
+    }
+  }
 
   totalPages = Math.ceil(totalRecords / limit);
 

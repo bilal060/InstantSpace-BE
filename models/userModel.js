@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema({
   },
   photo: String,
   branch: { type: mongoose.Schema.Types.ObjectId, ref: 'Space' },
+  subcategoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   slot: Object,
   role: {
     type: String,

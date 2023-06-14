@@ -19,6 +19,11 @@ const bookingSchema = new Schema(
       ref: 'Space',
       required: true
     },
+    subcategoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true
+    },
     details: { type: Object, required: true },
     from: { type: Date, required: true },
     to: { type: Date, required: true },

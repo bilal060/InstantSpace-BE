@@ -19,6 +19,7 @@ router.get('/booking_details/:sid', authController.protect, bookingController.bo
 router.post('/create_booking', authController.protect, [
     check('userId').not().isEmpty(),
     check('spaceId').not().isEmpty(),
+    check('subcategoryId').not().isEmpty(),
     check('card').not().isEmpty(),
     check('details').not().isEmpty(),
     check('from').isISO8601().toDate().not().isEmpty(),
