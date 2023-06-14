@@ -162,13 +162,24 @@ const userBookings = async (req, res, next) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    try {
-        totalRecords = await Booking.find({ userId: uid }).count();
-        allBookings = await Booking.find({ userId: uid }).populate('userId').populate('spaceId').skip(skip).limit(limit);
-    } catch (error) {
-        console.log({ error });
-        return next(new AppError('Error fetching records', 500));
-    };
+    if (req.query.filterBy) {
+        try {
+            totalRecords = await Booking.find({ userId: uid, subcategoryId: req.query.filterBy }).countDocuments();
+            allBookings = await Booking.find({ userId: uid, subcategoryId: req.query.filterBy }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+        } catch (error) {
+            console.log({ error });
+            return next(new AppError('Error fetching records', 500));
+        };
+    }
+    else {
+        try {
+            totalRecords = await Booking.find({ userId: uid }).countDocuments();
+            allBookings = await Booking.find({ userId: uid }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+        } catch (error) {
+            console.log({ error });
+            return next(new AppError('Error fetching records', 500));
+        };
+    }
 
     totalPages = Math.ceil(totalRecords / limit);
 
@@ -220,12 +231,23 @@ const ownerBookings = async (req, res, next) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    try {
-        totalRecords = await Booking.find({ ownerId }).countDocuments();
-        allBookings = await Booking.find({ ownerId }).populate('userId').populate('spaceId').skip(skip).limit(limit);
-    } catch (error) {
-        console.log(error);
-        return next(new AppError('Error fetching records', 500));
+    if (req.query.filterBy) {
+        try {
+            totalRecords = await Booking.find({ ownerId, subcategoryId: req.query.filterBy }).countDocuments();
+            allBookings = await Booking.find({ ownerId, subcategoryId: req.query.filterBy }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching records', 500));
+        }
+    }
+    else {
+        try {
+            totalRecords = await Booking.find({ ownerId }).countDocuments();
+            allBookings = await Booking.find({ ownerId }).populate('userId').populate('spaceId').skip(skip).limit(limit);
+        } catch (error) {
+            console.log(error);
+            return next(new AppError('Error fetching records', 500));
+        }
     }
 
     totalPages = Math.ceil(totalRecords / limit);
