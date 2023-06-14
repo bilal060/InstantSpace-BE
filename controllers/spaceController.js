@@ -345,7 +345,6 @@ const getUserSpaces = async (req, res, next) => {
 
     res.json({ spaces: updated, page, totalRecords, totalPages, limit });
 
-
 };
 
 /**
