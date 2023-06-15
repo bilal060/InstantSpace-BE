@@ -431,12 +431,28 @@ const filterSpaces = async (req, res, next) => {
                         type: 'Point',
                         coordinates: [parseFloat(req.body.lng), parseFloat(req.body.lat)]
                     },
-                    maxDistance: req.body.radius * 1000,
+                    maxDistance: +req.query.radius * 1000,
                     distanceField: 'distance',
                     spherical: true
                 }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "userId"
+                }
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "categoryId",
+                    foreignField: "_id",
+                    as: "categoryId"
+                }
             }
-        ])
+        ]);
     } catch (error) {
         console.log(error);
         return next(new AppError('Error fetching spaces', 500));
