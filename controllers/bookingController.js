@@ -68,7 +68,7 @@ const createBooking = async (req, res, next) => {
 
     try {
         charge = await stripe.charges.create({
-            amount: Math.floor((+req.body.price * calculatedHours) * 100),
+            amount: parseInt((+req.body.price * calculatedHours) * 100),
             currency: 'usd',
             source: req.body.card,
             customer: userDetails.customerId,

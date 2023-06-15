@@ -36,16 +36,15 @@ const addNewSpace = async (req, res, next) => {
         return next(error);
     }
 
-    const location = {
-        address: req.body.location,
-        coordinates
-    };
-
     const imagesPath = req?.files.map(img => img.path);
 
     const newSpace = new Space({
         ...req.body,
-        location,
+        location: {
+            type: 'Point',
+            coordinates: [coordinates.lng, coordinates.lat]
+        },
+        address: req.body.location,
         images: imagesPath
     });
 
@@ -417,6 +416,35 @@ const addReview = async (req, res, next) => {
     res.json({ message: 'Review added successfully' });
 };
 
+const filterSpaces = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new AppError('Invalid data received', 422));
+    }
+
+    let filteredSpaces;
+    try {
+        filteredSpaces = await Space.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: [parseFloat(req.body.lng), parseFloat(req.body.lat)]
+                    },
+                    maxDistance: req.body.radius * 1000,
+                    distanceField: 'distance',
+                    spherical: true
+                }
+            }
+        ])
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching spaces', 500));
+    }
+
+    res.json({ filteredSpaces });
+};
+
 exports.addNewSpace = addNewSpace;
 exports.getAllSpaces = getAllSpaces;
 exports.getSingleSpace = getSingleSpace;
@@ -425,4 +453,5 @@ exports.addReview = addReview;
 exports.updateSpace = updateSpace;
 exports.deleteSpace = deleteSpace;
 exports.getSpacesBySubcatId = getSpacesBySubcatId;
+exports.filterSpaces = filterSpaces;
 

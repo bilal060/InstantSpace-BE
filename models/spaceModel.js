@@ -19,8 +19,19 @@ const spaceSchema = new Schema({
     rate_hour: { type: Number },
     rate_day: { type: Number },
     rate_week: { type: Number },
+    address: { type: String },
     rate_month: { type: Number },
-    location: { type: Object },
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
     description: { type: String },
     images: [{ type: String }],
     available: { type: Boolean, default: true },
@@ -32,5 +43,7 @@ const spaceSchema = new Schema({
     }]
 },
     { timestamps: true });
+
+spaceSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('Space', spaceSchema);

@@ -15,6 +15,12 @@ router.get('/single_space/:sid', authController.protect, spaceController.getSing
 
 router.get('/space/:uid', spaceController.getUserSpaces);
 
+router.post('/filter-spaces', [
+    check('lng').isFloat().not().isEmpty(),
+    check('lat').isFloat().not().isEmpty(),
+    check('radius').isFloat().not().isEmpty(),
+], spaceController.filterSpaces);
+
 router.post('/add_space', authController.protect, spaceUpload.any('space_imgs'), [
     check('userId').not().isEmpty(),
     check('categoryId').not().isEmpty(),
