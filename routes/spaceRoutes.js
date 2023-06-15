@@ -15,10 +15,19 @@ router.get('/single_space/:sid', authController.protect, spaceController.getSing
 
 router.get('/space/:uid', spaceController.getUserSpaces);
 
-router.post('/filter-spaces', [
+router.post('/filter-spaces', authController.protect, [
     check('lng').isFloat().not().isEmpty(),
     check('lat').isFloat().not().isEmpty(),
 ], spaceController.filterSpaces);
+
+router.post('/change-availability',
+    authController.protect,
+    [
+        check('spaceId').not().isEmpty(),
+        check('availability').isBoolean().not().isEmpty(),
+    ],
+    spaceController.changeAvailability
+)
 
 router.post('/add_space', authController.protect, spaceUpload.any('space_imgs'), [
     check('userId').not().isEmpty(),

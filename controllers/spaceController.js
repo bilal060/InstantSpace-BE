@@ -151,8 +151,8 @@ const getAllSpaces = async (req, res, next) => {
 
     if (req.query.filterby) {
         try {
-            totalRecords = await Space.find({ subCategoryId: req.query.filterby }).count();
-            allSpaces = await Space.find({ subCategoryId: req.query.filterby })
+            totalRecords = await Space.find({ subCategoryId: req.query.filterby, available: true }).count();
+            allSpaces = await Space.find({ subCategoryId: req.query.filterby, available: true })
                 .populate('managers')
                 .populate('userId')
                 .populate('categoryId')
@@ -166,8 +166,8 @@ const getAllSpaces = async (req, res, next) => {
     }
     else {
         try {
-            totalRecords = await Space.find({}).count();
-            allSpaces = await Space.find({})
+            totalRecords = await Space.find({ available: true }).count();
+            allSpaces = await Space.find({ available: true })
                 .populate('managers')
                 .populate('userId')
                 .populate('categoryId')
@@ -461,6 +461,36 @@ const filterSpaces = async (req, res, next) => {
     res.json({ filteredSpaces });
 };
 
+const changeAvailability = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new AppError('Invalid data received', 422));
+    }
+
+    let existingSpace;
+    try {
+        existingSpace = await Space.findById(req.body.spaceId);
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error finding space', 500));
+    }
+
+    if (!existingSpace) {
+        return next(new AppError('No space found against id', 404));
+    }
+
+    existingSpace.available = req.body.availability;
+
+    try {
+        await existingSpace.save();
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error updating availability', 500));
+    };
+
+    res.json({ message: 'Space availability updated successfully' });
+};
+
 exports.addNewSpace = addNewSpace;
 exports.getAllSpaces = getAllSpaces;
 exports.getSingleSpace = getSingleSpace;
@@ -470,4 +500,5 @@ exports.updateSpace = updateSpace;
 exports.deleteSpace = deleteSpace;
 exports.getSpacesBySubcatId = getSpacesBySubcatId;
 exports.filterSpaces = filterSpaces;
+exports.changeAvailability = changeAvailability;
 
