@@ -261,7 +261,7 @@ const deleteSpace = async (req, res, next) => {
         return next(new AppError('No space found against id', 404));
     }
 
-    res.json({ space: singleSpace });
+    res.json({ space: singleSpace, message: 'Space deleted successfully' });
 };
 /**
  * This function retrieves all spaces associated with a user ID and returns them as a JSON object.
