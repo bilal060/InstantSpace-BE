@@ -22,7 +22,7 @@ const new_conversation = async (req, res, next) => {
 
     let checkConversation;
     try {
-        checkConversation = await Conversation.findOne({
+        checkConversation = await Conversation.find({
             members: { $in: [req.body.senderId && req.body.receiverId] }
         })
     } catch (error) {
@@ -30,7 +30,9 @@ const new_conversation = async (req, res, next) => {
         return next(new AppError('Error getting conversations', 500));
     };
 
-    if (!checkConversation) {
+    const checkExistingConversations = checkConversation.some(conv => conv.members.length > 2 || conv.members.length === 2);
+
+    if (checkConversation.length === 0 || !checkExistingConversations) {
         const newConversation = new Conversation({
             members: [req.body.senderId, req.body.receiverId],
         });

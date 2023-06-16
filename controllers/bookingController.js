@@ -1,9 +1,12 @@
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
 const AppError = require('../utils/appError');
 const Space = require('../models/spaceModel');
 const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
+const Conversation = require('../models/conversationModel');
+const Message = require('../models/messageModel');
 const stripe = require('stripe')('sk_test_51N7wBGI06aS9z6rYIDfQ62UPHoTSjVFqHpW36GxstL0nh2QDGT3ugfuuVczNOMDUIj4bZ0QBEkZ5xIoP3ir2Hw8y00KhX7qHE6');
 
 
@@ -90,12 +93,27 @@ const createBooking = async (req, res, next) => {
         managers: spaceDetails.managers
     });
 
+    const newConversation = new Conversation({
+        members: [req.body.userId, spaceDetails.userId, ...spaceDetails.managers],
+    });
+
+    const newMessage = new Message({
+        conversationId: newConversation.id,
+        sender: spaceDetails.userId,
+        message: `${userDetails.fullName} your booking has been created`
+    });
+
     try {
-        await newBooking.save();
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        await newConversation.save({ session: session });
+        await newMessage.save({ session: session });
+        await newBooking.save({ session: session });
+        await session.commitTransaction();
     } catch (error) {
-        console.log({ error });
-        return next(new AppError('Error creating new booking', 500));
-    };
+        console.log(error);
+        return next(new AppError("Error starting new conversation", 500));
+    }
 
     res.status(201).json({ message: 'Booking created successfully' });
 };
