@@ -74,4 +74,6 @@ router.patch('/update_space/:spaceId', authController.protect, spaceUpload.any('
     check('description').isString().not().isEmpty(),
 ], spaceController.updateSpace);
 
+router.delete('/delete-space/:sid', spaceController.deleteSpace)
+
 module.exports = router;

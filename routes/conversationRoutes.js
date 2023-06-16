@@ -10,7 +10,7 @@ router.get('/', authController.protect, conversationController.all_conversations
 
 router.get('/:userId', conversationController.get_user_conversations);
 
-router.post('/', authController.protect, conversationController.new_conversation);
+router.post('/', conversationController.new_conversation);
 
 router.post('/add-user/:convId', authController.protect, [
     check('userId').not().isEmpty(),

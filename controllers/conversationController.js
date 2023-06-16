@@ -19,17 +19,31 @@ const Conversation = require('../models/conversationModel');
  * resource has been successfully created.
  */
 const new_conversation = async (req, res, next) => {
-    const newConversation = new Conversation({
-        members: [req.body.senderId, req.body.receiverId],
-    });
 
+    let checkConversation;
     try {
-        await newConversation.save();
+        checkConversation = await Conversation.findOne({
+            members: { $in: [req.body.senderId && req.body.receiverId] }
+        })
     } catch (error) {
         console.log(error);
-        return next(new AppError("Error starting new conversation", 500));
+        return next(new AppError('Error getting conversations', 500));
+    };
+
+    if (!checkConversation) {
+        const newConversation = new Conversation({
+            members: [req.body.senderId, req.body.receiverId],
+        });
+
+        try {
+            await newConversation.save();
+        } catch (error) {
+            console.log(error);
+            return next(new AppError("Error starting new conversation", 500));
+        }
     }
-    res.status(201).json({ newConversation });
+
+    res.status(201).json({ message: "Successful" });
 };
 
 /**
@@ -49,6 +63,7 @@ const new_conversation = async (req, res, next) => {
  * array of all existing conversations retrieved from the database.
  */
 const all_conversations = async (req, res, next) => {
+
     let existingConversations;
     try {
         existingConversations = await Conversation.find({});
