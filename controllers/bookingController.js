@@ -112,7 +112,7 @@ const createBooking = async (req, res, next) => {
         await session.commitTransaction();
     } catch (error) {
         console.log(error);
-        return next(new AppError("Error starting new conversation", 500));
+        return next(new AppError("Booking not created", 500));
     }
 
     res.status(201).json({ message: 'Booking created successfully' });

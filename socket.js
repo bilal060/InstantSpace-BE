@@ -1,8 +1,8 @@
-const { Server } = require("socket.io");  
+const { Server } = require("socket.io");
 const Socket = require('./models/Socket.model.js');
 const io = new Server(8900, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL,
   },
 });
 let users = [];
@@ -25,20 +25,20 @@ io.on("connection", (socket) => {
     // online user 
     addUser(userId, socket.id);
     io.emit("getUsers", users);
-    
-    let sockets = await Socket.find({ userId }); 
-    if (!sockets.includes(socket.id)) { 
+
+    let sockets = await Socket.find({ userId });
+    if (!sockets.includes(socket.id)) {
       await Socket.updateOne(
         { userId, socketId: socket.id },
         { socketId: socket.id },
         { upsert: true }
       );
     }
-  }); 
+  });
 
   //send and get message
-  socket.on("sendMessage", async ({ senderId, receiverId, message }) => {  
-    let sockets = await Socket.find({ userId: receiverId });  
+  socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
+    let sockets = await Socket.find({ userId: receiverId });
     for (let Socket of sockets) {
       io.to(Socket.socketId).emit("getMessage", {
         receiverId,
@@ -48,12 +48,12 @@ io.on("connection", (socket) => {
     }
   });
 
-      //when disconnect
+  //when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
     removeUser(socket.id);
     io.emit("getUsers", users);
   });
 });
-module.exports = io; 
+module.exports = io;
 
