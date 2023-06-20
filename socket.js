@@ -1,4 +1,5 @@
 const { Server } = require("socket.io");
+const fileUpload = require('./middlewares/file-upload');
 const Socket = require('./models/Socket.model.js');
 const io = new Server(8900, {
   cors: {
@@ -37,16 +38,20 @@ io.on("connection", (socket) => {
   });
 
   //send and get message
-  socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
+  socket.on("sendMessage", async ({ senderId, receiverId, message, createdAt }) => {
     let sockets = await Socket.find({ userId: receiverId });
     for (let Socket of sockets) {
       io.to(Socket.socketId).emit("getMessage", {
         receiverId,
         senderId,
         message,
+        createdAt
       });
     }
   });
+
+  // send and get file
+
 
   //when disconnect
   socket.on("disconnect", () => {

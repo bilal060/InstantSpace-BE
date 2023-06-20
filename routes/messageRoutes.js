@@ -1,5 +1,4 @@
 const express = require('express');
-const { check } = require('express-validator');
 
 const messageController = require('../controllers/messageController');
 const fileUpload = require('../middlewares/file-upload');
