@@ -178,7 +178,14 @@ exports.managerInvitation = async (req, res, next) => {
     return next(new AppError('Error sending invitation', 500));
   }
 
-  const message = `${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}&email=${req.body.email}&branch=${req.body.branch}`;
+  let message = '';
+
+  if (req.body.platform && req.body.platform === 'mobile') {
+    message = `${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation-mobile?token=${hashedToken}&email=${req.body.email}&branch=${req.body.branch}`;
+  }
+  else {
+    message = `${process.env.SERVER_BASE_URL}/api/v1/users/verify-manager-invitation?token=${hashedToken}&email=${req.body.email}&branch=${req.body.branch}`;
+  }
 
   const newManager = new User({
     ...req.body,
@@ -230,6 +237,29 @@ exports.verifyInvitation = async (req, res, next) => {
   }
 
   res.redirect(`${process.env.FRONTEND_URL}/auth/manager/register?email=${existingManager.email}&branch=${branch}`);
+
+};
+
+exports.verifyInvitationMobile = async (req, res, next) => {
+  const { token, email, branch } = req.query;
+
+  let existingManager;
+  try {
+    existingManager = await User.findOne({ email });
+  } catch (error) {
+    console.log(error);
+    return (new AppError('Error fetching manager', 500))
+  }
+
+  if (!existingManager) {
+    return (new AppError('No manager found', 404))
+  }
+
+  if (existingManager.managerToken !== token) {
+    return res.send("ERROR");
+  }
+
+  res.json({ existingManager });
 
 };
 
