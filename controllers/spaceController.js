@@ -57,6 +57,42 @@ const addNewSpace = async (req, res, next) => {
     res.status(201).json({ message: 'Space added successfully' });
 };
 
+const areaSpaces = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new AppError('Invalid data received', 422));
+    }
+
+    let coordinates;
+    try {
+        coordinates = await getCoordsOfAddress(req.body.address);
+    } catch (error) {
+        return next(error);
+    }
+
+    let filteredSpaces;
+    try {
+        filteredSpaces = await Space.find(
+            {
+                location:
+                {
+                    $near:
+                    {
+                        $geometry: { type: "Point", coordinates: [parseFloat(coordinates.lng), parseFloat(coordinates.lat)] },
+                        $maxDistance: 50 * 1000
+                    }
+                }
+            }
+        ).populate('userId');
+    } catch (error) {
+        console.log(error);
+        return next(new AppError('Error fetching spaces', 500));
+    }
+
+    res.json({ filteredSpaces });
+
+};
+
 /**
  * This function updates a space's properties and images in a database.
  * @param req - req stands for request and it is an object that contains information about the HTTP
@@ -424,35 +460,18 @@ const filterSpaces = async (req, res, next) => {
 
     let filteredSpaces;
     try {
-        filteredSpaces = await Space.aggregate([
+        filteredSpaces = await Space.find(
             {
-                $geoNear: {
-                    near: {
-                        type: 'Point',
-                        coordinates: [parseFloat(req.body.lng), parseFloat(req.body.lat)]
-                    },
-                    maxDistance: +req.query.radius * 1000,
-                    distanceField: 'distance',
-                    spherical: true
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "userId",
-                    foreignField: "_id",
-                    as: "userId"
-                }
-            },
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "categoryId",
-                    foreignField: "_id",
-                    as: "categoryId"
+                location:
+                {
+                    $near:
+                    {
+                        $geometry: { type: "Point", coordinates: [parseFloat(req.body.lng), parseFloat(req.body.lat)] },
+                        $maxDistance: +req.query.radius * 1000
+                    }
                 }
             }
-        ]);
+        ).populate('userId');
     } catch (error) {
         console.log(error);
         return next(new AppError('Error fetching spaces', 500));
@@ -501,4 +520,5 @@ exports.deleteSpace = deleteSpace;
 exports.getSpacesBySubcatId = getSpacesBySubcatId;
 exports.filterSpaces = filterSpaces;
 exports.changeAvailability = changeAvailability;
+exports.areaSpaces = areaSpaces;
 

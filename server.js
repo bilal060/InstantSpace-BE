@@ -1,30 +1,33 @@
 const mongoose = require('mongoose');
 mongoose.set('debug', false);
 const dotenv = require('dotenv');
-// process.on('uncaughtException', err=>{
-//   console.log(err.name,err.message)
-//   console.log('UNHANDLED REJECTION SERVER SHUTTING DOWN!')
-//     process.exit(1)
-// })
 dotenv.config({ path: './config.env' });
 const app = require('./app');
 const Socket = require('./models/Socket.model.js');
-const cors = require("cors");
-app.use(cors({
-  origin: '*'
-}));
-const http = require('http').Server(app);
+const server = require('http').createServer(app);
 
-const io = require('socket.io')(http, {
+const DB = process.env.DATABASE
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true
+  })
+  .then(() => console.log('DB connection successful!'));
+const port = process.env.PORT || 5001;
+server.listen(port, () => {
+  console.log(`App running on port ${port}...`);
+});
+
+const io = require('socket.io')(server, {
 
   cors: {
     origin: "*",
     methods: ["PUT", "GET", "POST", "DELETE", "OPTIONS"],
     credentials: false
   }
-  // transports: ['websocket']
 });
-
 
 let users = [];
 const addUser = (userId, socketId) => {
@@ -76,23 +79,3 @@ io.on("connection", (socket) => {
     io.emit("getUsers", users);
   });
 });
-const DB = process.env.DATABASE
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true
-  })
-  .then(() => console.log('DB connection successful!'));
-const port = process.env.PORT || 5001;
-http.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
-// process.on('unhandledRejection', err=>{
-//   console.log(err.name,err.message)
-//   console.log('UNHANDLED REJECTION SERVER SHUTTING DOWN!')
-//   server.close(()=>{
-//     process.exit(1)
-//   })
-// })

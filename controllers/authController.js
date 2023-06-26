@@ -107,7 +107,8 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res, message)
 })
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password, role } = req.body
+  console.log("Working");
+  const { email, password, role } = req.body;
   if (!(email, password)) {
     return next(new AppError('please provide email and password !', 400))
   }

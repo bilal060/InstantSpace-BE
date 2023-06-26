@@ -3,7 +3,7 @@ const fileUpload = require('./middlewares/file-upload');
 const Socket = require('./models/Socket.model.js');
 const io = new Server(8900, {
   cors: {
-    origin: process.env.FRONTEND_URL,
+    origin: '*',
   },
 });
 let users = [];

@@ -23,8 +23,6 @@ router.post('/manager-invitation', [
 
 router.get('/verify-manager-invitation', userController.verifyInvitation);
 
-router.get('/verify-manager-invitation-mobile', userController.verifyInvitationMobile);
-
 router.get('/owner-managers/:ownerId', authController.protect, userController.getOwnerManagers);
 
 router.patch('/manager_resgister', [

@@ -15,7 +15,11 @@ router.get('/single_space/:sid', authController.protect, spaceController.getSing
 
 router.get('/space/:uid', spaceController.getUserSpaces);
 
-router.post('/filter-spaces', authController.protect, [
+router.post('/area-spaces', [
+    check('address').not().isEmpty(),
+], spaceController.areaSpaces);
+
+router.post('/filter-spaces', [
     check('lng').isFloat().not().isEmpty(),
     check('lat').isFloat().not().isEmpty(),
 ], spaceController.filterSpaces);
