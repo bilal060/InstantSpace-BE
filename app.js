@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
+const nodemailer = require('nodemailer')
 const userRouter = require('./routes/userRoutes');
 const conversationRouter = require('./routes/conversationRoutes');
 const messageRouter = require('./routes/messageRoutes');
@@ -80,6 +81,11 @@ app.use('/uploads/profile', express.static(path.join('uploads', 'profile')));
 app.use('/uploads/vehicle', express.static(path.join('uploads', 'vehicle')));
 app.use('/uploads/driverProfile', express.static(path.join('uploads', 'driverProfile')));
 
+
+
+
+
+
 app.use('/api', limiter)
 app.use(express.json({ limit: '10kb' }));
 app.use(express.static(`${__dirname}/public`))
@@ -90,6 +96,45 @@ app.use('/api/v1/spaces', spaceRouter);
 app.use('/api/v1/bookings', bookingRouter);
 app.use('/api/v1/category', categoryRouter);
 app.use('/api/v1/vehicle', vehicleRouter);
+app.post('/sendEmail', async (req, res) => {
+  const { firstName, lastName, email, areaCode, phoneNumber, company, subject, details } = req.body;
+  const emailBody = `
+    First Name: ${firstName}
+    Last Name: ${lastName}
+    Email: ${email}
+    Phone Number: ${areaCode}-${phoneNumber}
+    Company: ${company}
+    Subject: ${subject}
+    Details: ${details}
+  `;
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'sh.hafizhasnain@gmail.com',
+      pass: 'kmskfcjdnewqidbl'
+    }
+  });
+  const mailOptions = {
+    from: 'info@prefabhedgehouse.com',
+    to: ['peter@prefabhedgehouse.com' , 'peter@prefabhedgehouse.com'],
+    subject: 'Contact Form Submission',
+    text: emailBody
+  };
+
+  await transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+})
+
+
+
+
+
+
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
 })
@@ -107,6 +152,13 @@ app.use(globalErrorHandler)
 //   }
 // }); 
 // });
+
+
+
+
+
+
+
 module.exports = app;
 
 
